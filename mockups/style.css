@@ -710,6 +710,87 @@ ul {
   flex: 1;
 }
 
+/* ============================================================
+   10. INDEX / LANDING (root index.html)
+   ============================================================ */
+.index {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-48);
+}
+
+.index__lede {
+  margin-top: var(--spacing-16);
+  max-width: 60ch;
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body-lg);
+  color: var(--color-mid-gray);
+}
+
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-20);
+}
+
+.index-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.index-card__n {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+  color: var(--color-mid-gray);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-8);
+}
+
+.index-card__title {
+  font-size: var(--text-subheading);
+  line-height: var(--leading-subheading);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+}
+
+.index-card__desc {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-mid-gray);
+}
+
+.index-card__cta {
+  margin-top: var(--spacing-16);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ink);
+}
+
+.index-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+  align-items: center;
+}
+
+.index-note {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-mid-gray);
+  max-width: 70ch;
+}
+
+@media (max-width: 720px) {
+  .index-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* ---------- Centered single-column layouts (Init / Add) ---------- */
 .stack-center {
   max-width: 420px;
