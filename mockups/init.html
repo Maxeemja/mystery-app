@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wishlist — Init</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="doc">
+
+  <header>
+    <h1 class="doc__title">Wishlist — Екран 1 · Init</h1>
+    <p class="doc__subtitle">Одноразовий екран знайомства. Поле заповнене, кнопка «Далі» в активному стані.</p>
+  </header>
+
+  <!-- ============ Desktop ============ -->
+  <section class="mock-section">
+    <p class="mock-caption">Desktop — заповнене поле, активна кнопка</p>
+
+    <div class="frame frame--desktop frame--center">
+      <div class="stack-center">
+        <h2 class="display">Як тебе звати?</h2>
+
+        <div class="field" style="margin-top: 32px;">
+          <label class="label" for="init-name-d">Твоє ім’я</label>
+          <input class="input input--focus" id="init-name-d" type="text" value="Мар’яна" readonly>
+          <p class="helper">Від 3 до 15 символів</p>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn--primary" type="button">Далі</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Mobile ============ -->
+  <section class="mock-section">
+    <p class="mock-caption">Mobile — заповнене поле, активна кнопка</p>
+
+    <div class="frame-row">
+      <div class="frame frame--mobile frame--center">
+        <div class="stack-center">
+          <h2 class="display">Як тебе звати?</h2>
+
+          <div class="field" style="margin-top: 32px;">
+            <label class="label" for="init-name-m">Твоє ім’я</label>
+            <input class="input input--focus" id="init-name-m" type="text" value="Мар’яна" readonly>
+            <p class="helper">Від 3 до 15 символів</p>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn--primary btn--block" type="button">Далі</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

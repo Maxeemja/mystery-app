@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wishlist — Поділитися</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="doc">
+
+  <header>
+    <h1 class="doc__title">Wishlist — Екран 4 · «Поділитися»</h1>
+    <p class="doc__subtitle">Той самий список, тільки для читання. Здійснені бажання не показуємо — 🎧 «Навушники» відсутні.</p>
+  </header>
+
+  <!-- ==========================================================
+       Desktop
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Desktop — вигляд для друзів</p>
+
+    <div class="frame frame--desktop">
+      <div class="share-shell">
+
+        <div class="share-shell__head">
+          <h2 class="display">Список бажань Мар’яни</h2>
+        </div>
+
+        <div class="wish-grid wish-grid--2">
+
+          <article class="card wish wish--readonly">
+            <span class="wish__emoji">📚</span>
+            <h3 class="wish__title">Книжка про дизайну</h3>
+            <p class="wish__price">₴450</p>
+          </article>
+
+          <article class="card wish wish--readonly">
+            <span class="wish__emoji">✈️</span>
+            <h3 class="wish__title">Вихідні у Львові</h3>
+            <p class="wish__price">₴3 000</p>
+          </article>
+
+        </div>
+
+        <!--
+          Mobile behaviour note (not rendered):
+          Tapping «Поділитися» on mobile invokes the native OS share sheet
+          (Web Share API). No system UI is drawn here on purpose.
+        -->
+        <div class="share-actions">
+          <button class="btn btn--primary" type="button">Поділитися</button>
+          <button class="btn btn--outline" type="button">Зберегти як картинку</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Mobile
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Mobile — вигляд для друзів</p>
+
+    <div class="frame-row">
+      <div class="frame frame--mobile frame--auto">
+        <div class="screen-scroll">
+          <div class="share-shell">
+
+            <div class="share-shell__head">
+              <h2 class="display">Список бажань Мар’яни</h2>
+            </div>
+
+            <div class="wish-grid">
+
+              <article class="card wish wish--readonly">
+                <span class="wish__emoji">📚</span>
+                <h3 class="wish__title">Книжка про дизайну</h3>
+                <p class="wish__price">₴450</p>
+              </article>
+
+              <article class="card wish wish--readonly">
+                <span class="wish__emoji">✈️</span>
+                <h3 class="wish__title">Вихідні у Львові</h3>
+                <p class="wish__price">₴3 000</p>
+              </article>
+
+            </div>
+
+            <!--
+              Mobile behaviour note (not rendered):
+              Tapping «Поділитися» here would open the phone's native share sheet.
+              Intentionally no mock of the system dialog.
+            -->
+            <div class="share-actions">
+              <button class="btn btn--primary" type="button">Поділитися</button>
+              <button class="btn btn--outline" type="button">Зберегти як картинку</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

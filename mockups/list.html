@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wishlist — Мої бажання</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="doc">
+
+  <header>
+    <h1 class="doc__title">Wishlist — Екран 2 · «Мої бажання»</h1>
+    <p class="doc__subtitle">Хаб навігації. Стани: наповнений список і порожній стан, кожен у desktop і mobile.</p>
+  </header>
+
+  <!-- ==========================================================
+       STATE 1 — Populated · Desktop
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Desktop — наповнений список</p>
+
+    <div class="frame frame--desktop">
+      <div class="screen-head">
+        <div>
+          <h2 class="heading">Мої бажання</h2>
+          <p class="counter">3 бажання · 1 здійснене</p>
+        </div>
+        <div class="screen-actions">
+          <button class="btn btn--outline" type="button">Поділитися</button>
+          <button class="btn btn--primary" type="button">Додати</button>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <button class="badge badge--solid" type="button">Усі</button>
+        <button class="badge badge--outline" type="button">Активні</button>
+        <button class="badge badge--outline" type="button">Здійснені</button>
+      </div>
+
+      <div class="wish-grid">
+
+        <article class="card wish">
+          <div class="wish__top">
+            <span class="wish__emoji">📚</span>
+            <button class="icon-btn icon-btn--outline" type="button" aria-label="Позначити здійсненим">✓</button>
+          </div>
+          <h3 class="wish__title">Книжка про дизайну</h3>
+          <p class="wish__price">₴450</p>
+          <a class="wish__link" href="#">Подивитися →</a>
+          <div class="wish__foot">
+            <button class="icon-btn icon-btn--destructive" type="button" aria-label="Видалити бажання">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <article class="card wish">
+          <div class="wish__top">
+            <span class="wish__emoji">✈️</span>
+            <button class="icon-btn icon-btn--outline" type="button" aria-label="Позначити здійсненим">✓</button>
+          </div>
+          <h3 class="wish__title">Вихідні у Львові</h3>
+          <p class="wish__price">₴3 000</p>
+          <a class="wish__link" href="#">Подивитися →</a>
+          <div class="wish__foot">
+            <button class="icon-btn icon-btn--destructive" type="button" aria-label="Видалити бажання">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <!-- Completed wish: same structure, muted via opacity, "✓" inverted -->
+        <article class="card wish wish--done">
+          <div class="wish__top">
+            <span class="wish__emoji">🎧</span>
+            <button class="icon-btn icon-btn--pressed" type="button" aria-label="Здійснене">✓</button>
+          </div>
+          <h3 class="wish__title">Навушники</h3>
+          <p class="wish__price">₴2 200</p>
+          <a class="wish__link" href="#">Подивитися →</a>
+          <div class="wish__foot">
+            <button class="icon-btn icon-btn--destructive" type="button" aria-label="Видалити бажання">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       STATE 1 — Populated · Mobile
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Mobile — наповнений список, «Додати» у закріпленій нижній панелі</p>
+
+    <div class="frame-row">
+      <div class="frame frame--mobile frame--auto">
+        <div class="screen-scroll screen-scroll--with-bar">
+
+          <div class="screen-head" style="margin-bottom: 16px;">
+            <div>
+              <h2 class="heading-sm">Мої бажання</h2>
+              <p class="counter">3 бажання · 1 здійснене</p>
+            </div>
+          </div>
+
+          <div class="filter-row" style="margin-bottom: 16px;">
+            <button class="badge badge--solid" type="button">Усі</button>
+            <button class="badge badge--outline" type="button">Активні</button>
+            <button class="badge badge--outline" type="button">Здійснені</button>
+          </div>
+
+          <div class="wish-grid">
+
+            <article class="card wish">
+              <div class="wish__top">
+                <span class="wish__emoji">📚</span>
+                <button class="icon-btn icon-btn--outline" type="button" aria-label="Позначити здійсненим">✓</button>
+              </div>
+              <h3 class="wish__title">Книжка про дизайну</h3>
+              <p class="wish__price">₴450</p>
+              <a class="wish__link" href="#">Подивитися →</a>
+              <div class="wish__foot">
+                <button class="icon-btn icon-btn--destructive" type="button" aria-label="Видалити бажання">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                </button>
+              </div>
+            </article>
+
+            <article class="card wish">
+              <div class="wish__top">
+                <span class="wish__emoji">✈️</span>
+                <button class="icon-btn icon-btn--outline" type="button" aria-label="Позначити здійсненим">✓</button>
+              </div>
+              <h3 class="wish__title">Вихідні у Львові</h3>
+              <p class="wish__price">₴3 000</p>
+              <a class="wish__link" href="#">Подивитися →</a>
+              <div class="wish__foot">
+                <button class="icon-btn icon-btn--destructive" type="button" aria-label="Видалити бажання">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                </button>
+              </div>
+            </article>
+
+            <article class="card wish wish--done">
+              <div class="wish__top">
+                <span class="wish__emoji">🎧</span>
+                <button class="icon-btn icon-btn--pressed" type="button" aria-label="Здійснене">✓</button>
+              </div>
+              <h3 class="wish__title">Навушники</h3>
+              <p class="wish__price">₴2 200</p>
+              <a class="wish__link" href="#">Подивитися →</a>
+              <div class="wish__foot">
+                <button class="icon-btn icon-btn--destructive" type="button" aria-label="Видалити бажання">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                </button>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <button class="btn btn--outline" type="button">Поділитися</button>
+          <button class="btn btn--primary" type="button">Додати</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       STATE 2 — Empty · Desktop
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Desktop — порожній стан</p>
+
+    <div class="frame frame--desktop frame--center">
+      <div class="empty">
+        <p class="empty__text">Поки що жодного бажання. Чого тобі хочеться?</p>
+        <button class="btn btn--primary" type="button">Додати</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       STATE 2 — Empty · Mobile
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Mobile — порожній стан</p>
+
+    <div class="frame-row">
+      <div class="frame frame--mobile frame--center">
+        <div class="empty">
+          <p class="empty__text">Поки що жодного бажання. Чого тобі хочеться?</p>
+          <button class="btn btn--primary" type="button">Додати</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

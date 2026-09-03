@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wishlist — Додати</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="doc">
+
+  <header>
+    <h1 class="doc__title">Wishlist — Екран 3 · «Додати»</h1>
+    <p class="doc__subtitle">Коротка форма. Стани: кнопка неактивна (назва порожня) і активна (назва заповнена), кожен у desktop і mobile.</p>
+  </header>
+
+  <!-- ==========================================================
+       STATE 1 — Disabled · Desktop
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Desktop — назва порожня, кнопка неактивна</p>
+
+    <div class="frame frame--desktop">
+      <div class="form-shell">
+
+        <div class="form-actions form-actions--top">
+          <button class="btn btn--outline" type="button">← Скасувати</button>
+        </div>
+
+        <div class="card card--form">
+          <h2 class="heading card__title">Додати</h2>
+
+          <div class="field">
+            <label class="label" for="add-title-dd">Що це?</label>
+            <input class="input" id="add-title-dd" type="text" placeholder="Наприклад, кава з собою" readonly>
+          </div>
+
+          <div class="field">
+            <span class="label">Емодзі</span>
+            <div class="emoji-row">
+              <span class="emoji-opt emoji-opt--selected">🎁</span>
+              <span class="emoji-opt">📚</span>
+              <span class="emoji-opt">✈️</span>
+              <span class="emoji-opt">🎧</span>
+              <span class="emoji-opt">👟</span>
+              <span class="emoji-opt">💻</span>
+              <span class="emoji-opt">🎮</span>
+              <span class="emoji-opt">☕</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label">Або своя картинка</span>
+            <div class="upload">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/></svg>
+              <span>Завантажити</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="add-price-dd">Скільки коштує</label>
+            <div class="field-row">
+              <input class="input" id="add-price-dd" type="text" inputmode="numeric" placeholder="0" readonly>
+              <select class="input select" aria-label="Валюта">
+                <option selected>UAH</option>
+                <option>PLN</option>
+                <option>USD</option>
+                <option>EUR</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="add-url-dd">Посилання</label>
+            <input class="input" id="add-url-dd" type="text" placeholder="https://…" readonly>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn--disabled" type="button" disabled>Додати бажання</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       STATE 2 — Enabled · Desktop
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Desktop — назва заповнена, кнопка активна</p>
+
+    <div class="frame frame--desktop">
+      <div class="form-shell">
+
+        <div class="form-actions form-actions--top">
+          <button class="btn btn--outline" type="button">← Скасувати</button>
+        </div>
+
+        <div class="card card--form">
+          <h2 class="heading card__title">Додати</h2>
+
+          <div class="field">
+            <label class="label" for="add-title-ed">Що це?</label>
+            <input class="input input--focus" id="add-title-ed" type="text" value="Кава з собою" readonly>
+          </div>
+
+          <div class="field">
+            <span class="label">Емодзі</span>
+            <div class="emoji-row">
+              <span class="emoji-opt">🎁</span>
+              <span class="emoji-opt">📚</span>
+              <span class="emoji-opt">✈️</span>
+              <span class="emoji-opt">🎧</span>
+              <span class="emoji-opt">👟</span>
+              <span class="emoji-opt">💻</span>
+              <span class="emoji-opt">🎮</span>
+              <span class="emoji-opt emoji-opt--selected">☕</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label">Або своя картинка</span>
+            <div class="upload">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/></svg>
+              <span>Завантажити</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="add-price-ed">Скільки коштує</label>
+            <div class="field-row">
+              <input class="input" id="add-price-ed" type="text" inputmode="numeric" placeholder="0" readonly>
+              <select class="input select" aria-label="Валюта">
+                <option selected>UAH</option>
+                <option>PLN</option>
+                <option>USD</option>
+                <option>EUR</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="add-url-ed">Посилання</label>
+            <input class="input" id="add-url-ed" type="text" placeholder="https://…" readonly>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn--primary" type="button">Додати бажання</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Mobile — both states side by side
+       ========================================================== -->
+  <section class="mock-section">
+    <p class="mock-caption">Mobile — ліворуч кнопка неактивна, праворуч активна</p>
+
+    <div class="frame-row">
+
+      <!-- Mobile · disabled -->
+      <div class="frame frame--mobile frame--auto">
+        <div class="screen-scroll">
+
+          <div class="form-actions form-actions--top">
+            <button class="btn btn--outline" type="button">← Скасувати</button>
+          </div>
+
+          <div class="card card--form">
+            <h2 class="heading-sm card__title">Додати</h2>
+
+            <div class="field">
+              <label class="label" for="add-title-dm">Що це?</label>
+              <input class="input" id="add-title-dm" type="text" placeholder="Наприклад, кава з собою" readonly>
+            </div>
+
+            <div class="field">
+              <span class="label">Емодзі</span>
+              <div class="emoji-row">
+                <span class="emoji-opt emoji-opt--selected">🎁</span>
+                <span class="emoji-opt">📚</span>
+                <span class="emoji-opt">✈️</span>
+                <span class="emoji-opt">🎧</span>
+                <span class="emoji-opt">👟</span>
+                <span class="emoji-opt">💻</span>
+                <span class="emoji-opt">🎮</span>
+                <span class="emoji-opt">☕</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="label">Або своя картинка</span>
+              <div class="upload">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/></svg>
+                <span>Завантажити</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="add-price-dm">Скільки коштує</label>
+              <div class="field-row">
+                <input class="input" id="add-price-dm" type="text" inputmode="numeric" placeholder="0" readonly>
+                <select class="input select" aria-label="Валюта">
+                  <option selected>UAH</option>
+                  <option>PLN</option>
+                  <option>USD</option>
+                  <option>EUR</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="add-url-dm">Посилання</label>
+              <input class="input" id="add-url-dm" type="text" placeholder="https://…" readonly>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn--disabled btn--block" type="button" disabled>Додати бажання</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Mobile · enabled -->
+      <div class="frame frame--mobile frame--auto">
+        <div class="screen-scroll">
+
+          <div class="form-actions form-actions--top">
+            <button class="btn btn--outline" type="button">← Скасувати</button>
+          </div>
+
+          <div class="card card--form">
+            <h2 class="heading-sm card__title">Додати</h2>
+
+            <div class="field">
+              <label class="label" for="add-title-em">Що це?</label>
+              <input class="input input--focus" id="add-title-em" type="text" value="Кава з собою" readonly>
+            </div>
+
+            <div class="field">
+              <span class="label">Емодзі</span>
+              <div class="emoji-row">
+                <span class="emoji-opt">🎁</span>
+                <span class="emoji-opt">📚</span>
+                <span class="emoji-opt">✈️</span>
+                <span class="emoji-opt">🎧</span>
+                <span class="emoji-opt">👟</span>
+                <span class="emoji-opt">💻</span>
+                <span class="emoji-opt">🎮</span>
+                <span class="emoji-opt emoji-opt--selected">☕</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="label">Або своя картинка</span>
+              <div class="upload">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/></svg>
+                <span>Завантажити</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="add-price-em">Скільки коштує</label>
+              <div class="field-row">
+                <input class="input" id="add-price-em" type="text" inputmode="numeric" placeholder="0" readonly>
+                <select class="input select" aria-label="Валюта">
+                  <option selected>UAH</option>
+                  <option>PLN</option>
+                  <option>USD</option>
+                  <option>EUR</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="add-url-em">Посилання</label>
+              <input class="input" id="add-url-em" type="text" placeholder="https://…" readonly>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn--primary btn--block" type="button">Додати бажання</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
