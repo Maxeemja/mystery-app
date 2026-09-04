@@ -70,7 +70,7 @@ export function InitScreen() {
         leaving ? 'opacity-0' : 'opacity-100',
       ].join(' ')}
     >
-      <div className="mx-auto w-full max-w-[420px]">
+      <div className="mx-auto w-full max-w-md">
         <h1 className="text-heading-lg font-semibold sm:text-display">
           Як тебе звати?
         </h1>
