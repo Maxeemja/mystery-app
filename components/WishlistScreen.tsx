@@ -131,6 +131,19 @@ export function WishlistScreen() {
     return <ListSkeleton />
   }
 
+  // The profile read itself failed (as opposed to a later write, which is
+  // handled inline per-action below) — total storage unavailability at boot,
+  // not covered by the effect above since it only redirects on a *confirmed*
+  // missing profile. Say so rather than rendering a blank screen forever,
+  // which would be indistinguishable from a broken deploy.
+  if (profileStatus === 'error') {
+    return (
+      <main className="mx-auto max-w-page px-6 py-10">
+        <p className="text-body text-ember">Не вдалося прочитати збережені дані</p>
+      </main>
+    )
+  }
+
   // Profile confirmed absent: the effect above is about to redirect to /init.
   // Render blank rather than the list skeleton — a skeleton implies "your list
   // is coming", which is misleading a moment before leaving this route

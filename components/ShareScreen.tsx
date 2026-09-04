@@ -45,6 +45,15 @@ export function ShareScreen() {
   if (profileStatus === 'loading' || status === 'loading') {
     return <main className="min-h-screen" />
   }
+  // Profile read itself failed (total storage unavailability) — say so rather
+  // than a blank screen forever (same reasoning as WishlistScreen).
+  if (profileStatus === 'error') {
+    return (
+      <main className="mx-auto max-w-page px-6 py-10">
+        <p className="text-body text-ember">Не вдалося прочитати збережені дані</p>
+      </main>
+    )
+  }
   if (!profile) {
     return <main className="min-h-screen" />
   }

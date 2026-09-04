@@ -40,46 +40,52 @@ export function useWishes() {
     }
   }, [])
 
-  const toggleDone = useCallback(async (id: string) => {
-    setSaveError(false)
-    let previous: Wish | undefined
-    setWishes((current) =>
-      current.map((wish) => {
-        if (wish.id !== id) return wish
-        previous = wish
-        return { ...wish, isDone: !wish.isDone }
-      })
-    )
-    try {
-      await wishRepository.update(id, { isDone: !previous?.isDone })
-    } catch {
-      setSaveError(true)
-      if (previous) {
-        const restored = previous
-        setWishes((current) =>
-          current.map((wish) => (wish.id === id ? restored : wish))
-        )
-      }
-    }
-  }, [])
+  /**
+   * `previous` is read directly off the `wishes` closure rather than captured
+   * as a side effect inside the optimistic `setWishes` updater. The updater
+   * form doesn't guarantee it runs before the code right after it — in
+   * particular, when this is invoked from a `setTimeout` callback (as
+   * `remove` is, from the hub's post-delete-animation timer) rather than
+   * directly inside a React event handler, React can defer running the
+   * updater until after the storage call has already failed and the catch
+   * block already checked it, losing the rollback race silently. Reading the
+   * closure variable has no such race.
+   */
+  const toggleDone = useCallback(
+    async (id: string) => {
+      const previous = wishes.find((wish) => wish.id === id)
+      if (!previous) return
 
-  const remove = useCallback(async (id: string) => {
-    setSaveError(false)
-    let previous: Wish | undefined
-    setWishes((current) => {
-      previous = current.find((wish) => wish.id === id)
-      return current.filter((wish) => wish.id !== id)
-    })
-    try {
-      await wishRepository.remove(id)
-    } catch {
-      setSaveError(true)
-      if (previous) {
-        const restored = previous
-        setWishes((current) => [...current, restored])
+      setSaveError(false)
+      setWishes((current) =>
+        current.map((wish) => (wish.id === id ? { ...wish, isDone: !wish.isDone } : wish))
+      )
+      try {
+        await wishRepository.update(id, { isDone: !previous.isDone })
+      } catch {
+        setSaveError(true)
+        setWishes((current) => current.map((wish) => (wish.id === id ? previous : wish)))
       }
-    }
-  }, [])
+    },
+    [wishes]
+  )
+
+  const remove = useCallback(
+    async (id: string) => {
+      const previous = wishes.find((wish) => wish.id === id)
+      if (!previous) return
+
+      setSaveError(false)
+      setWishes((current) => current.filter((wish) => wish.id !== id))
+      try {
+        await wishRepository.remove(id)
+      } catch {
+        setSaveError(true)
+        setWishes((current) => [...current, previous])
+      }
+    },
+    [wishes]
+  )
 
   return {
     status,
