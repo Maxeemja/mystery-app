@@ -4,15 +4,36 @@
 
 > Product designed and launched with Claude Code.
 
-**Статус:** специфікація в стані чернетки, розробка ще не починалася. У репозиторії наразі — продуктова документація і статичні мокапи екранів.
+**Статус:** розробка почалася. Специфікація та інтеракції погоджені, фундамент (Stage 0) готовий — екрани збираються по стадіях із [docs/dev-prompts.md](docs/dev-prompts.md).
 
 ## Документація
 
 | Файл | Про що |
 |---|---|
-| [docs/spec.md](docs/spec.md) | Специфікація продукту: модель даних, екрани, мобільна поведінка, DoD, відкриті питання |
+| [docs/spec.md](docs/spec.md) | Специфікація продукту: модель даних, екрани, мобільна поведінка, DoD |
+| [docs/interactions.md](docs/interactions.md) | Функціональні інтеракції: усі стани, анімації, клавіатура, чекліст приймання |
+| [docs/tech-stack.md](docs/tech-stack.md) | Технічні рішення: Next.js, IndexedDB, шар репозиторіїв, план етапу 2 |
 | [docs/style-guide.md](docs/style-guide.md) | Дизайн-система **Ui** (shadcn/ui-подібна): токени, компоненти, do's & don'ts |
 | [docs/prompter-task.md](docs/prompter-task.md) | Завдання на генерацію мокапів — вижимка зі spec + style-guide |
+| [docs/dev-prompts.md](docs/dev-prompts.md) | Шість стадій розробки, по одному промпту на стадію |
+
+## Розробка
+
+Next.js (App Router) + TypeScript + Tailwind v4, дані — в IndexedDB на пристрої.
+
+```bash
+npm install && npm run dev
+```
+
+| Команда | Що робить |
+|---|---|
+| `npm run dev` | Дев-сервер на http://localhost:3000 |
+| `npm run build` | Продакшн-білд |
+| `npm run typecheck` | `tsc --noEmit` |
+
+Структура — за [tech-stack.md §5](docs/tech-stack.md): `app/` (роути), `components/` (клієнтські компоненти), `lib/db` (IndexedDB), `lib/repositories` (єдиний шар доступу до даних), `lib/domain` (чиста логіка без React і без сховища), `lib/share` (Web Share + PNG), `styles/theme.css` (токени).
+
+Тема навмисно замкнена: у `styles/theme.css` неймспейси кольорів, радіусів і тіней скинуті в `initial`, тож `bg-red-500`, `rounded-xl` чи `shadow-md` просто не існують. Якщо потрібної утиліти немає — це дизайн-система відмовляє, а не привід додати токен.
 
 ## Екрани
 
@@ -30,18 +51,18 @@
 Статичні презентаційні макети — чистий HTML + CSS, без фреймворка, без JS і без збірки. Кожен стан відрендерено окремою секцією, тож нічого не треба клікати.
 
 ```bash
-open mockups/init.html
+open public/mockups/init.html
 ```
 
 | Файл | Що показує |
 |---|---|
-| [mockups/style.css](mockups/style.css) | Токени як CSS custom properties + спільні компоненти для всіх екранів |
-| [mockups/init.html](mockups/init.html) | Init — desktop і mobile, заповнене поле, активна кнопка |
-| [mockups/list.html](mockups/list.html) | «Мої бажання» — наповнений список і порожній стан, кожен у desktop і mobile |
-| [mockups/add.html](mockups/add.html) | «Додати» — неактивна і активна кнопка, кожна у desktop і mobile |
-| [mockups/share.html](mockups/share.html) | «Поділитися» — desktop і mobile |
+| [mockups/style.css](public/mockups/style.css) | Токени як CSS custom properties + спільні компоненти для всіх екранів |
+| [mockups/init.html](public/mockups/init.html) | Init — desktop і mobile, заповнене поле, активна кнопка |
+| [mockups/list.html](public/mockups/list.html) | «Мої бажання» — наповнений список і порожній стан, кожен у desktop і mobile |
+| [mockups/add.html](public/mockups/add.html) | «Додати» — неактивна і активна кнопка, кожна у desktop і mobile |
+| [mockups/share.html](public/mockups/share.html) | «Поділитися» — desktop і mobile |
 
-Мокапи не є продакшн-кодом: це знімки станів для рев'ю. Мобільні фрейми навмисно ростуть під контент, щоб жодна картка не обрізалась.
+Мокапи не є продакшн-кодом: це знімки станів для рев'ю. Мобільні фрейми навмисно ростуть під контент, щоб жодна картка не обрізалась. Лежать у `public/`, тож на деплої доступні за `/mockups/`.
 
 ## Візуальний стиль
 
@@ -50,7 +71,7 @@ open mockups/init.html
 - Палітра: Canvas `#f5f5f5`, Paper `#ffffff`, Ink `#0a0a0a`, Ink Soft `#171717`, Mid Gray `#737373`, Hairline `#e5e5e5`.
 - Ember `#e7000b` — єдиний колір у системі, зарезервований **виключно** для видалення. Ніде більше.
 - Шрифт Geist (сабститут Inter). Заголовки — 600 із tight tracking, тексти — 400/500, не менше 14px.
-- Радіуси лише двох значень: 18px (кнопки, інпути, беджі) і 24px (картки).
+- Радіуси лише трьох значень: 18px (кнопки, інпути, беджі), 24px (картки) і 10px (вкладене прев'ю картинки).
 - Тіні лише на картках. У кнопок, беджів та інпутів тіней немає.
 
 Повний референс — [style-guide.md](docs/style-guide.md).
