@@ -125,9 +125,23 @@ export function WishlistScreen() {
     setProfile(next)
   }
 
-  // Skeleton while either read is in flight — never the empty-state copy, or a
-  // populated list flashes «Поки що жодного бажання» (tech-stack.md §3).
-  if (profileStatus !== 'ready' || !profile || status === 'loading') {
+  // Sequential early returns (rather than one combined boolean) so that
+  // narrowing `profile` to non-null actually holds for the JSX below.
+  if (profileStatus === 'loading') {
+    return <ListSkeleton />
+  }
+
+  // Profile confirmed absent: the effect above is about to redirect to /init.
+  // Render blank rather than the list skeleton — a skeleton implies "your list
+  // is coming", which is misleading a moment before leaving this route
+  // entirely (mirrors how InitScreen blanks out for the opposite case).
+  if (!profile) {
+    return <main className="min-h-screen" />
+  }
+
+  // Skeleton while the wish read is in flight — never the empty-state copy, or
+  // a populated list flashes «Поки що жодного бажання» (tech-stack.md §3).
+  if (status === 'loading') {
     return <ListSkeleton />
   }
 
