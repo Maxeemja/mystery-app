@@ -45,142 +45,144 @@
 @import 'tailwindcss';
 
 @theme {
-  /* --------------------------------------------------------------------
+	/* --------------------------------------------------------------------
      Colors — namespace reset, then only the system palette.
      -------------------------------------------------------------------- */
-  --color-*: initial;
+	--color-*: initial;
 
-  /* Structural keywords the framework itself relies on. */
-  --color-transparent: transparent;
-  --color-current: currentColor;
+	/* Structural keywords the framework itself relies on. */
+	--color-transparent: transparent;
+	--color-current: currentColor;
 
-  /* Surfaces (style-guide.md §Surfaces) */
-  --color-canvas: #f5f5f5; /* page background, secondary buttons, input fill */
-  --color-paper: #ffffff; /* card surfaces, modal surfaces */
-  --color-surface-alt: #fafafa; /* subtle card variant, inverted button text */
+	/* Surfaces (style-guide.md §Surfaces) */
+	--color-canvas: #f5f5f5; /* page background, secondary buttons, input fill */
+	--color-paper: #ffffff; /* card surfaces, modal surfaces */
+	--color-surface-alt: #fafafa; /* subtle card variant, inverted button text */
 
-  /* Ink */
-  --color-ink: #0a0a0a; /* primary text, filled button background */
-  --color-ink-soft: #171717; /* solid badge background, secondary ink */
-  --color-mid-gray: #737373; /* muted body text, placeholders, helper labels */
-  --color-hairline: #e5e5e5; /* borders, focus ring, badge outlines */
+	/* Ink */
+	--color-ink: #0a0a0a; /* primary text, filled button background */
+	--color-ink-soft: #171717; /* solid badge background, secondary ink */
+	--color-mid-gray: #737373; /* muted body text, placeholders, helper labels */
+	--color-hairline: #e5e5e5; /* borders, focus ring, badge outlines */
+	--color-green: oklch(79.2% 0.209 151.711);
+	/* The two chromatic exceptions — see invariant 1 above. */
+	--color-ember: #e7000b; /* destructive + inline errors ONLY */
+	--color-confetti-amber: #f59e0b; /* Share screen banner background ONLY */
 
-  /* The two chromatic exceptions — see invariant 1 above. */
-  --color-ember: #e7000b; /* destructive + inline errors ONLY */
-  --color-confetti-amber: #f59e0b; /* Share screen banner background ONLY */
-
-  /* --------------------------------------------------------------------
+	/* --------------------------------------------------------------------
      Radius — namespace reset, then exactly three values.
      style-guide.md's own @theme block ships 6px and 14px; the product rule
      (spec.md §8) allows neither, so they are dropped here on purpose.
      -------------------------------------------------------------------- */
-  --radius-*: initial;
-  --radius-control: 18px; /* buttons, inputs, badges */
-  --radius-card: 24px; /* cards, modals, Share banner */
-  --radius-media: 10px; /* nested image preview / upload zone */
+	--radius-*: initial;
+	--radius-control: 18px; /* buttons, inputs, badges */
+	--radius-card: 24px; /* cards, modals, Share banner */
+	--radius-media: 10px; /* nested image preview / upload zone */
 
-  /* --------------------------------------------------------------------
+	/* --------------------------------------------------------------------
      Shadows — namespace reset, then the single card elevation.
      -------------------------------------------------------------------- */
-  --shadow-*: initial;
-  --shadow-subtle:
-    0 0 0 1px rgb(23 23 23 / 0.05), 0 1px 3px rgb(0 0 0 / 0.1),
-    0 1px 2px -1px rgb(0 0 0 / 0.1);
+	--shadow-*: initial;
+	--shadow-subtle:
+		0 0 0 1px rgb(23 23 23 / 0.05), 0 1px 3px rgb(0 0 0 / 0.1),
+		0 1px 2px -1px rgb(0 0 0 / 0.1);
 
-  /* Card hover lifts the same stack slightly (interactions.md §2.3) — still
+	/* Card hover lifts the same stack slightly (interactions.md §2.3) — still
      the card-only shadow, just one step stronger. */
-  --shadow-subtle-lift:
-    0 0 0 1px rgb(23 23 23 / 0.05), 0 4px 10px rgb(0 0 0 / 0.08),
-    0 2px 4px -1px rgb(0 0 0 / 0.1);
+	--shadow-subtle-lift:
+		0 0 0 1px rgb(23 23 23 / 0.05), 0 4px 10px rgb(0 0 0 / 0.08),
+		0 2px 4px -1px rgb(0 0 0 / 0.1);
 
-  /* --------------------------------------------------------------------
+	/* --------------------------------------------------------------------
      Typography.
      Geist is self-hosted through the `geist` package (next/font/local under
      the hood) — no network fetch at build time. Inter stays in the stack as
      the documented substitute.
      -------------------------------------------------------------------- */
-  --font-sans:
-    var(--font-geist-sans), Inter, ui-sans-serif, system-ui, -apple-system,
-    BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--font-sans:
+		var(--font-geist-sans), Inter, ui-sans-serif, system-ui, -apple-system,
+		BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  --text-caption: 12px;
-  --text-caption--line-height: 1.33;
-  --text-caption--letter-spacing: 0.05em;
-  --text-body: 14px;
-  --text-body--line-height: 1.43;
-  --text-body-lg: 16px;
-  --text-body-lg--line-height: 1.5;
-  --text-subheading: 18px;
-  --text-subheading--line-height: 1.56;
-  --text-heading-sm: 24px;
-  --text-heading-sm--line-height: 1.33;
-  --text-heading-sm--letter-spacing: -0.025em;
-  --text-heading: 30px;
-  --text-heading--line-height: 1.2;
-  --text-heading--letter-spacing: -0.025em;
-  --text-heading-lg: 36px;
-  --text-heading-lg--line-height: 1.11;
-  --text-heading-lg--letter-spacing: -0.025em;
-  --text-display: 48px;
-  --text-display--line-height: 1.1;
-  --text-display--letter-spacing: -0.05em;
+	--text-caption: 12px;
+	--text-caption--line-height: 1.33;
+	--text-caption--letter-spacing: 0.05em;
+	--text-body: 14px;
+	--text-body--line-height: 1.43;
+	--text-body-lg: 16px;
+	--text-body-lg--line-height: 1.5;
+	--text-subheading: 18px;
+	--text-subheading--line-height: 1.56;
+	--text-heading-sm: 24px;
+	--text-heading-sm--line-height: 1.33;
+	--text-heading-sm--letter-spacing: -0.025em;
+	--text-heading: 30px;
+	--text-heading--line-height: 1.2;
+	--text-heading--letter-spacing: -0.025em;
+	--text-heading-lg: 36px;
+	--text-heading-lg--line-height: 1.11;
+	--text-heading-lg--letter-spacing: -0.025em;
+	--text-display: 48px;
+	--text-display--line-height: 1.1;
+	--text-display--letter-spacing: -0.05em;
 
-  /* --------------------------------------------------------------------
+	/* --------------------------------------------------------------------
      Spacing — Tailwind's dynamic 4px scale is kept as-is (it already matches
      the system's base unit). Only the named layout values the dynamic scale
      can't express are added.
      -------------------------------------------------------------------- */
-  --spacing-card: 20px; /* card padding — p-card */
-  --spacing-section: 48px; /* section gap, lower bound — gap-section */
-  --spacing-section-lg: 80px; /* section gap, upper bound */
+	--spacing-card: 20px; /* card padding — p-card */
+	--spacing-section: 48px; /* section gap, lower bound — gap-section */
+	--spacing-section-lg: 80px; /* section gap, upper bound */
 
-  --container-page: 1280px; /* page max-width — max-w-page */
+	--container-page: 1280px; /* page max-width — max-w-page */
 
-  /* --------------------------------------------------------------------
+	/* --------------------------------------------------------------------
      Animation — the one multi-step animation in the system.
      Tint, not color: #ffffff → #f5f5f5 → #ffffff over ~900ms
      (interactions.md §2.8).
      -------------------------------------------------------------------- */
-  --animate-highlight: highlight-tint 900ms ease-out 1;
+	--animate-highlight: highlight-tint 900ms ease-out 1;
 
-  @keyframes highlight-tint {
-    0% {
-      background-color: #ffffff;
-    }
-    35% {
-      background-color: #f5f5f5;
-    }
-    100% {
-      background-color: #ffffff;
-    }
-  }
+	@keyframes highlight-tint {
+		0% {
+			background-color: #ffffff;
+		}
+		35% {
+			background-color: #f5f5f5;
+		}
+		100% {
+			background-color: #ffffff;
+		}
+	}
 }
 
 /* ============================================================================
    Base layer
    ========================================================================== */
 @layer base {
-  html {
-    -webkit-text-size-adjust: 100%;
-  }
+	html {
+		-webkit-text-size-adjust: 100%;
+	}
 
-  body {
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-    font-family: var(--font-sans);
-    font-size: var(--text-body);
-    line-height: 1.43;
-    font-feature-settings: 'ss01' on, 'cv11' on;
-    -webkit-font-smoothing: antialiased;
-  }
+	body {
+		background-color: var(--color-canvas);
+		color: var(--color-ink);
+		font-family: var(--font-sans);
+		font-size: var(--text-body);
+		line-height: 1.43;
+		font-feature-settings:
+			'ss01' on,
+			'cv11' on;
+		-webkit-font-smoothing: antialiased;
+	}
 
-  /* Focus is always visible, and it is always the same hairline ring as an
+	/* Focus is always visible, and it is always the same hairline ring as an
      input in focus (interactions.md §0.3). Declared once here so no component
      has to remember it. */
-  :focus-visible {
-    outline: 2px solid var(--color-hairline);
-    outline-offset: 2px;
-  }
+	:focus-visible {
+		outline: 2px solid var(--color-hairline);
+		outline-offset: 2px;
+	}
 }
 
 /* ============================================================================
@@ -192,9 +194,9 @@
    component reaches for: 18/24/10px are the only radii that can ever render.
    ========================================================================== */
 @layer utilities {
-  .rounded-full {
-    border-radius: var(--radius-control);
-  }
+	.rounded-full {
+		border-radius: var(--radius-control);
+	}
 }
 
 /* ============================================================================
@@ -204,13 +206,13 @@
    only the travel time collapses.
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    transition-delay: 0ms !important;
-    scroll-behavior: auto !important;
-  }
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		transition-delay: 0ms !important;
+		scroll-behavior: auto !important;
+	}
 }
