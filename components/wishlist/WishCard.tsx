@@ -151,7 +151,7 @@ export function WishCard({
 					</a>
 				) : null}
 
-				<div className='mt-[auto] flex items-center pt-1'>
+				<div className='mt-auto flex items-center pt-1'>
 					<button
 						type='button'
 						onClick={onRequestDelete}
