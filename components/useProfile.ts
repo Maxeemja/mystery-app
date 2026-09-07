@@ -1,18 +1,22 @@
 'use client'
 
 /**
- * Profile lookup for the routing gate.
+ * Profile lookup for the hub header.
  *
- * Profile existence is only knowable in the browser (docs/tech-stack.md §3), so
- * both `/` and `/init` have to resolve it after mount. `status` exists so
- * callers can render a skeleton while the read is in flight instead of briefly
- * showing the wrong screen.
+ * On stage 1 this read IndexedDB, because profile existence was only knowable
+ * in the browser. It now goes through a Server Action, so the identity behind
+ * it comes from the session cookie rather than from anything the client says.
+ *
+ * The `status` triple is unchanged, and so is every caller's handling of it: a
+ * failed read still lands on `'error'`, which the screens already render an
+ * inline message for. What used to mean "storage unavailable" now also covers
+ * "the network call failed" — the same UI is correct for both.
  */
 
 import { useCallback, useEffect, useState } from 'react'
 
-import { LOCAL_USER_ID, type Profile } from '../lib/domain'
-import { localProfileRepository } from '../lib/repositories/client'
+import { getProfileAction } from '../app/actions/wishes'
+import type { Profile } from '../lib/domain'
 
 export type ProfileStatus = 'loading' | 'ready' | 'error'
 
@@ -23,18 +27,14 @@ export function useProfile() {
   useEffect(() => {
     let cancelled = false
 
-    localProfileRepository
-      .get(LOCAL_USER_ID)
+    getProfileAction()
       .then((found) => {
         if (cancelled) return
         setProfile(found)
         setStatus('ready')
       })
       .catch(() => {
-        if (cancelled) return
-        // Storage is unavailable (private browsing, blocked quota). Treated as
-        // "no profile we can read" — the caller decides what to show.
-        setStatus('error')
+        if (!cancelled) setStatus('error')
       })
 
     return () => {
@@ -43,7 +43,7 @@ export function useProfile() {
   }, [])
 
   const refresh = useCallback(async () => {
-    const found = await localProfileRepository.get(LOCAL_USER_ID)
+    const found = await getProfileAction()
     setProfile(found)
     return found
   }, [])

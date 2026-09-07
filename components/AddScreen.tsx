@@ -31,7 +31,7 @@ import {
   validateTitle,
   type Currency,
 } from '../lib/domain'
-import { localWishRepository } from '../lib/repositories/client'
+import { createWishAction } from '../app/actions/wishes'
 
 export function AddScreen() {
   const router = useRouter()
@@ -50,7 +50,7 @@ export function AddScreen() {
   const titleRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (profileStatus === 'ready' && !profile) router.replace('/init')
+    if (profileStatus === 'ready' && !profile) router.replace('/login')
   }, [profileStatus, profile, router])
 
   useEffect(() => {
@@ -117,12 +117,13 @@ export function AddScreen() {
     setSaving(true)
     setSaveFailed(false)
     try {
-      const stored = image instanceof File ? await compressImage(image) : image
-      const created = await localWishRepository.create(LOCAL_USER_ID, {
+      const created = await createWishAction({
         title: validateTitle(title).value,
-        // Emoji and image are mutually exclusive by construction; the default
-        // glyph only applies when neither was chosen.
-        ...(stored ? { image: stored } : { emoji: emoji ?? DEFAULT_EMOJI }),
+        // Images are not carried across this stage: a Blob cannot travel to
+        // Mongo, and Cloudinary is wired up in the next one. Until then a wish
+        // saves with its emoji (or the default glyph). The picker, compression
+        // and validation are all left in place for that stage to reconnect.
+        emoji: emoji ?? DEFAULT_EMOJI,
         ...(parsePriceInput(price) !== undefined
           ? { price: parsePriceInput(price), currency }
           : {}),

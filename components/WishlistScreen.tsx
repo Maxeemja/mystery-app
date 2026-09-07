@@ -14,6 +14,7 @@ import { Badge } from './ui/Badge'
 import { ButtonLink } from './ui/Button'
 import { EmptyState } from './wishlist/EmptyState'
 import { NameModal } from './wishlist/NameModal'
+import { ProfileMenu } from './wishlist/ProfileMenu'
 import { WishCard } from './wishlist/WishCard'
 import { useFlipReflow } from './wishlist/useFlipReflow'
 import { useProfile } from './useProfile'
@@ -24,7 +25,8 @@ import {
   sortWishes,
   type WishFilter,
 } from '../lib/domain'
-import { localProfileRepository } from '../lib/repositories/client'
+import { logoutAction } from '../app/actions/auth'
+import { renameProfileAction } from '../app/actions/wishes'
 
 /**
  * Set by the Add screen just before it navigates back, read and cleared here.
@@ -54,10 +56,14 @@ export function WishlistScreen() {
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
 
+  // A signed-in session with no profile document means the account was deleted
+  // out from under the cookie. `/login` rather than the stage-1 `/init`, which
+  // no longer exists.
   useEffect(() => {
-    if (profileStatus === 'ready' && !profile) router.replace('/init')
+    if (profileStatus === 'ready' && !profile) router.replace('/login')
   }, [profileStatus, profile, router])
 
   // Esc closes whichever inline confirmation is open (interactions.md §0.3).
@@ -120,9 +126,8 @@ export function WishlistScreen() {
 
   async function saveName(name: string) {
     if (!profile) return
-    const next = { ...profile, name }
-    await localProfileRepository.save(next)
-    setProfile(next)
+    await renameProfileAction(name)
+    setProfile({ ...profile, name })
   }
 
   // Sequential early returns (rather than one combined boolean) so that
@@ -166,13 +171,13 @@ export function WishlistScreen() {
       <main className="mx-auto max-w-page px-6 pt-10 pb-28 md:pb-10">
         <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <button
-              type="button"
-              onClick={() => setEditingName(true)}
-              className="text-heading font-semibold text-ink"
-            >
-              {profile.name}
-            </button>
+            <ProfileMenu
+              name={profile.name}
+              open={menuOpen}
+              onOpenChange={setMenuOpen}
+              onRename={() => setEditingName(true)}
+              onLogout={() => void logoutAction()}
+            />
             {/* Always the whole list, never the filtered subset. */}
             <p className="mt-1 text-body text-mid-gray">
               {formatCounter(total, done)}

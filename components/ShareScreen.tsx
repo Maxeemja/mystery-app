@@ -36,7 +36,7 @@ export function ShareScreen() {
 	const captureRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		if (profileStatus === 'ready' && !profile) router.replace('/init');
+		if (profileStatus === 'ready' && !profile) router.replace('/login');
 	}, [profileStatus, profile, router]);
 
 	// Sequential returns (see the Stage-2 fix in WishlistScreen) so `profile`

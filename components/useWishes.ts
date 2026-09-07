@@ -7,12 +7,21 @@
  * (docs/interactions.md §2.4). If the write fails, the optimistic change is
  * rolled back and `saveError` is raised so the screen can show the inline
  * «Не вдалося зберегти» from interactions.md §0.2.
+ *
+ * Stage 2 moved the writes from IndexedDB to Server Actions. That makes the
+ * failure path far more reachable than it was — offline, latency, a rejected
+ * action — but the handling is unchanged, because it was already written for
+ * "the write might not land".
  */
 
 import { useCallback, useEffect, useState } from 'react'
 
-import { LOCAL_USER_ID, countDone, type Wish } from '../lib/domain'
-import { localWishRepository } from '../lib/repositories/client'
+import {
+  listWishesAction,
+  removeWishAction,
+  setWishDoneAction,
+} from '../app/actions/wishes'
+import { countDone, type Wish } from '../lib/domain'
 
 export type WishesStatus = 'loading' | 'ready' | 'error'
 
@@ -24,8 +33,7 @@ export function useWishes() {
   useEffect(() => {
     let cancelled = false
 
-    localWishRepository
-      .list(LOCAL_USER_ID)
+    listWishesAction()
       .then((found) => {
         if (cancelled) return
         setWishes(found)
@@ -47,8 +55,8 @@ export function useWishes() {
    * particular, when this is invoked from a `setTimeout` callback (as
    * `remove` is, from the hub's post-delete-animation timer) rather than
    * directly inside a React event handler, React can defer running the
-   * updater until after the storage call has already failed and the catch
-   * block already checked it, losing the rollback race silently. Reading the
+   * updater until after the write has already failed and the catch block
+   * already checked it, losing the rollback race silently. Reading the
    * closure variable has no such race.
    */
   const toggleDone = useCallback(
@@ -61,9 +69,7 @@ export function useWishes() {
         current.map((wish) => (wish.id === id ? { ...wish, isDone: !wish.isDone } : wish))
       )
       try {
-        await localWishRepository.update(LOCAL_USER_ID, id, {
-          isDone: !previous.isDone,
-        })
+        await setWishDoneAction(id, !previous.isDone)
       } catch {
         setSaveError(true)
         setWishes((current) => current.map((wish) => (wish.id === id ? previous : wish)))
@@ -80,7 +86,7 @@ export function useWishes() {
       setSaveError(false)
       setWishes((current) => current.filter((wish) => wish.id !== id))
       try {
-        await localWishRepository.remove(LOCAL_USER_ID, id)
+        await removeWishAction(id)
       } catch {
         setSaveError(true)
         setWishes((current) => [...current, previous])

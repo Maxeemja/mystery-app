@@ -1,10 +1,13 @@
-import { InitScreen } from '../../components/InitScreen'
+import { redirect } from 'next/navigation'
 
 /**
- * Server shell only — the screen itself has to be client-side, because whether
- * a profile exists is knowable only in the browser (docs/tech-stack.md §3).
- * That is also why this gate cannot be a server redirect.
+ * `/init` was stage 1's onboarding screen; `/register` replaces it
+ * (docs/stage-2.md §3.1).
+ *
+ * Kept as a redirect rather than deleted: stage-1 users have this URL in their
+ * history and possibly bookmarked, and a 404 on a route that worked yesterday
+ * reads as a broken deploy. One file is cheap insurance against that.
  */
 export default function InitPage() {
-  return <InitScreen />
+  redirect('/register')
 }
