@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { LOCAL_USER_ID, type Profile } from '../lib/domain'
-import { profileRepository } from '../lib/repositories'
+import { localProfileRepository } from '../lib/repositories/client'
 
 export type ProfileStatus = 'loading' | 'ready' | 'error'
 
@@ -23,7 +23,7 @@ export function useProfile() {
   useEffect(() => {
     let cancelled = false
 
-    profileRepository
+    localProfileRepository
       .get(LOCAL_USER_ID)
       .then((found) => {
         if (cancelled) return
@@ -43,7 +43,7 @@ export function useProfile() {
   }, [])
 
   const refresh = useCallback(async () => {
-    const found = await profileRepository.get(LOCAL_USER_ID)
+    const found = await localProfileRepository.get(LOCAL_USER_ID)
     setProfile(found)
     return found
   }, [])

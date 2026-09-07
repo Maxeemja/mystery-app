@@ -24,7 +24,7 @@ import {
   sortWishes,
   type WishFilter,
 } from '../lib/domain'
-import { profileRepository } from '../lib/repositories'
+import { localProfileRepository } from '../lib/repositories/client'
 
 /**
  * Set by the Add screen just before it navigates back, read and cleared here.
@@ -121,7 +121,7 @@ export function WishlistScreen() {
   async function saveName(name: string) {
     if (!profile) return
     const next = { ...profile, name }
-    await profileRepository.save(next)
+    await localProfileRepository.save(next)
     setProfile(next)
   }
 

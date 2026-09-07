@@ -1,21 +1,40 @@
 /**
  * Repository contracts — docs/tech-stack.md §4.
  *
- * This is the seam that makes stage 2 a data migration rather than a rewrite.
- * Components never touch IndexedDB; they depend on these interfaces only, so
- * swapping in `MongoWishRepository` behind Server Actions changes no caller.
+ * This is the seam that makes stage 2 a data migration rather than a rewrite:
+ * components depend on these interfaces only, so an implementation can move
+ * from IndexedDB to Mongo-behind-Server-Actions without a caller caring.
  *
- * `userId` is threaded through every call even though stage 1 always passes
- * `LOCAL_USER_ID`. Dropping it now would mean editing every call site later.
+ * ## Ownership
+ *
+ * Every method takes `userId` as its first argument, including `update` and
+ * `remove`, which on stage 1 took only an `id`. That was safe when there was
+ * exactly one local user. It is not safe with accounts: Server Actions are
+ * publicly invocable endpoints, so an unscoped `remove(id)` lets anyone who
+ * guesses a wish id delete a stranger's data.
+ *
+ * The scope is part of the *contract* rather than something the Mongo
+ * implementation digs out of the session itself, for two reasons. A repository
+ * that imports Auth.js stops being a data-access seam — it can no longer be
+ * driven by a migration script or a test, and the IndexedDB implementation
+ * behind the same interface has no session to read at all. And putting it in
+ * the signature makes the requirement checkable: a call site that has no owner
+ * to pass does not compile.
+ *
+ * Implementations must fold the scope into the query itself (`{_id, userId}`),
+ * not check it afterwards, so a mismatch matches zero documents rather than
+ * relying on the caller to compare. `userId` must always be resolved from the
+ * session on the server — never accepted from the client, which would make it
+ * an impersonation parameter.
  */
 
-import type { NewWish, Profile, Wish } from '../domain/types'
+import type { NewWish, Profile, Wish, WishPatch } from '../domain/types'
 
 export interface WishRepository {
   list(userId: string): Promise<Wish[]>
   create(userId: string, data: NewWish): Promise<Wish>
-  update(id: string, patch: Partial<Wish>): Promise<Wish>
-  remove(id: string): Promise<void>
+  update(userId: string, id: string, patch: WishPatch): Promise<Wish>
+  remove(userId: string, id: string): Promise<void>
 }
 
 export interface ProfileRepository {

@@ -31,7 +31,7 @@ import {
   validateTitle,
   type Currency,
 } from '../lib/domain'
-import { wishRepository } from '../lib/repositories'
+import { localWishRepository } from '../lib/repositories/client'
 
 export function AddScreen() {
   const router = useRouter()
@@ -118,7 +118,7 @@ export function AddScreen() {
     setSaveFailed(false)
     try {
       const stored = image instanceof File ? await compressImage(image) : image
-      const created = await wishRepository.create(LOCAL_USER_ID, {
+      const created = await localWishRepository.create(LOCAL_USER_ID, {
         title: validateTitle(title).value,
         // Emoji and image are mutually exclusive by construction; the default
         // glyph only applies when neither was chosen.

@@ -61,7 +61,7 @@ export async function createProfileWithSeed(
     const created = await repos.wishes.create(LOCAL_USER_ID, data)
     // `create` stamps `createdAt = now` for all three, which would leave the
     // order undefined. Space them explicitly instead.
-    await repos.wishes.update(created.id, {
+    await repos.wishes.update(LOCAL_USER_ID, created.id, {
       createdAt: now - index * SEED_SPACING_MS,
       isDone,
     })

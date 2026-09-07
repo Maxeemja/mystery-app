@@ -4,7 +4,7 @@ import {
   request,
   withStore,
 } from '../db'
-import type { NewWish, Wish } from '../domain/types'
+import type { NewWish, Wish, WishPatch } from '../domain/types'
 import type { WishRepository } from './types'
 
 /**
@@ -38,20 +38,24 @@ export class IndexedDbWishRepository implements WishRepository {
     })
   }
 
-  async update(id: string, patch: Partial<Wish>): Promise<Wish> {
+  async update(userId: string, id: string, patch: WishPatch): Promise<Wish> {
     return withStore(STORE_WISHES, 'readwrite', async ([store]) => {
       const existing = await request(store!.get(id) as IDBRequest<Wish | undefined>)
-      if (!existing) throw new Error(`Wish ${id} not found`)
-      // `id` and `userId` are never patchable — a caller passing them is a bug,
-      // not an intent to re-key the record.
+      // An owner mismatch is reported as "not found" rather than "forbidden":
+      // a distinct error would confirm the id exists on some other account.
+      if (!existing || existing.userId !== userId) {
+        throw new Error(`Wish ${id} not found`)
+      }
       const next: Wish = { ...existing, ...patch, id: existing.id, userId: existing.userId }
       await request(store!.put(next))
       return next
     })
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(userId: string, id: string): Promise<void> {
     await withStore(STORE_WISHES, 'readwrite', async ([store]) => {
+      const existing = await request(store!.get(id) as IDBRequest<Wish | undefined>)
+      if (!existing || existing.userId !== userId) return
       await request(store!.delete(id))
     })
   }

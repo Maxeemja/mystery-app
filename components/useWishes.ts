@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { LOCAL_USER_ID, countDone, type Wish } from '../lib/domain'
-import { wishRepository } from '../lib/repositories'
+import { localWishRepository } from '../lib/repositories/client'
 
 export type WishesStatus = 'loading' | 'ready' | 'error'
 
@@ -24,7 +24,7 @@ export function useWishes() {
   useEffect(() => {
     let cancelled = false
 
-    wishRepository
+    localWishRepository
       .list(LOCAL_USER_ID)
       .then((found) => {
         if (cancelled) return
@@ -61,7 +61,9 @@ export function useWishes() {
         current.map((wish) => (wish.id === id ? { ...wish, isDone: !wish.isDone } : wish))
       )
       try {
-        await wishRepository.update(id, { isDone: !previous.isDone })
+        await localWishRepository.update(LOCAL_USER_ID, id, {
+          isDone: !previous.isDone,
+        })
       } catch {
         setSaveError(true)
         setWishes((current) => current.map((wish) => (wish.id === id ? previous : wish)))
@@ -78,7 +80,7 @@ export function useWishes() {
       setSaveError(false)
       setWishes((current) => current.filter((wish) => wish.id !== id))
       try {
-        await wishRepository.remove(id)
+        await localWishRepository.remove(LOCAL_USER_ID, id)
       } catch {
         setSaveError(true)
         setWishes((current) => [...current, previous])

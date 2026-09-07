@@ -14,7 +14,11 @@ import { Button } from './ui/Button'
 import { TextField } from './ui/TextField'
 import { useProfile } from './useProfile'
 import { NAME_MAX_LENGTH, nameHelperText, validateName } from '../lib/domain'
-import { createProfileWithSeed, profileRepository, wishRepository } from '../lib/repositories'
+import { createProfileWithSeed } from '../lib/repositories/bootstrap'
+import {
+  localProfileRepository,
+  localWishRepository,
+} from '../lib/repositories/client'
 
 export function InitScreen() {
   const router = useRouter()
@@ -44,8 +48,8 @@ export function InitScreen() {
     setStorageError(false)
     try {
       await createProfileWithSeed(validateName(name).value, {
-        profiles: profileRepository,
-        wishes: wishRepository,
+        profiles: localProfileRepository,
+        wishes: localWishRepository,
       })
       // Fade out, then navigate — no loading screen, the write is local.
       setLeaving(true)

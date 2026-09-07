@@ -6,7 +6,11 @@
  * database without a single edit (docs/tech-stack.md §5).
  */
 
-/** Stage 1 has no auth; every record is owned by this synthetic user. */
+/**
+ * Owner of every IndexedDB record. Stage 1 had no auth, so this was *the* user;
+ * from stage 2 on it only ever scopes the local store that stage 3's migration
+ * drains. Account-backed records are owned by a real Mongo `ObjectId`.
+ */
 export const LOCAL_USER_ID = 'local-user'
 
 export const CURRENCIES = ['UAH', 'PLN', 'USD', 'EUR'] as const
@@ -36,8 +40,20 @@ export interface Wish {
   title: string
   /** Unicode glyph. Mutually exclusive with `image` (interactions.md §3.3). */
   emoji?: string
-  /** Compressed image blob. Mutually exclusive with `emoji`. */
+  /**
+   * Compressed image blob — IndexedDB only. Stage 2 stores images in Cloudinary
+   * instead; this field survives solely so stage 3's migration can read the
+   * blobs it needs to upload.
+   */
   image?: Blob
+  /** Cloudinary `secure_url`. Mutually exclusive with `emoji`. */
+  imageUrl?: string
+  /**
+   * Cloudinary `public_id`. Always written alongside `imageUrl` — without it the
+   * file cannot be destroyed and a deleted wish leaks its image forever
+   * (docs/stage-2.md §7).
+   */
+  imagePublicId?: string
   /** Amount without currency. `0` is a valid (free) price. */
   price?: number
   /** Only meaningful when `price` is set. */
@@ -53,10 +69,23 @@ export interface NewWish {
   title: string
   emoji?: string
   image?: Blob
+  imageUrl?: string
+  imagePublicId?: string
   price?: number
   currency?: Currency
   url?: string
 }
+
+/**
+ * What a caller may change on an existing wish.
+ *
+ * Deliberately narrower than `Partial<Wish>`: `id` and `userId` are identity,
+ * not data. Allowing them in a patch would let a mutation re-key a record onto
+ * another account — the exact thing the owner scope on every repository call is
+ * there to prevent. `createdAt` stays patchable because seeding and stage-3
+ * migration both need to preserve original timestamps.
+ */
+export type WishPatch = Partial<Omit<Wish, 'id' | 'userId'>>
 
 export interface Profile {
   userId: string
