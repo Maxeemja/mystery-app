@@ -12,6 +12,7 @@
 import { useEffect, useRef } from 'react';
 
 import { Button } from '../ui/Button';
+import { PencilIcon } from './PencilIcon';
 import { TrashIcon } from './TrashIcon';
 import { WishMedia } from './WishMedia';
 import { formatPrice, type Wish } from '../../lib/domain';
@@ -21,6 +22,7 @@ interface WishCardProps {
 	confirmingDelete: boolean;
 	removing: boolean;
 	onToggleDone: () => void;
+	onEdit: () => void;
 	onRequestDelete: () => void;
 	onCancelDelete: () => void;
 	onConfirmDelete: () => void;
@@ -34,6 +36,7 @@ export function WishCard({
 	confirmingDelete,
 	removing,
 	onToggleDone,
+	onEdit,
 	onRequestDelete,
 	onCancelDelete,
 	onConfirmDelete,
@@ -64,7 +67,13 @@ export function WishCard({
 				'group relative flex flex-col rounded-card border border-hairline bg-paper p-card',
 				'shadow-subtle transition-[opacity,transform,box-shadow] duration-200 ease-out',
 				'hover:shadow-subtle-lift',
-				wish.isDone && !removing ? 'border-green!' : '',
+				// Done wishes are dimmed, not recolored: spec.md §8 and
+				// prompter-task.md §8 both call for opacity / Mid Gray and rule out a
+				// green "success" tint. This line briefly carried `border-green!`
+				// instead, which also required a `--color-green` token added directly
+				// under the palette lockdown that exists to make exactly that
+				// impossible.
+				wish.isDone && !removing ? 'opacity-55' : '',
 				removing ? 'scale-95 opacity-0' : '',
 				highlighted ? 'animate-highlight' : ''
 			]
@@ -122,7 +131,9 @@ export function WishCard({
 						}
 						tabIndex={confirmingDelete ? -1 : 0}
 						className={[
-							'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-control border',
+							// 44px, the minimum touch target (§2). This was 32px, which the
+							// requirement covers as much as it covers the new pencil.
+							'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-control border',
 							'text-body transition-opacity duration-150 ease-out',
 							wish.isDone
 								? 'border-ink-soft bg-ink-soft text-surface-alt'
@@ -151,14 +162,34 @@ export function WishCard({
 					</a>
 				) : null}
 
+				{/* Edit and delete as a group, pencil first — the destructive one goes
+				    last so it is not the easy mis-tap (§2). Both share the exact
+				    reveal classes the ✓ uses, so all three appear under one rule. */}
 				<div className='mt-auto flex items-center pt-1'>
+					<button
+						type='button'
+						onClick={onEdit}
+						aria-label='Редагувати бажання'
+						tabIndex={confirmingDelete ? -1 : 0}
+						className={[
+							'inline-flex h-11 w-11 items-center justify-center rounded-control',
+							// Mid Gray at rest, Ink on hover — both listed in §2, and neither
+							// is Ember: editing does not destroy anything.
+							'text-mid-gray hover:text-ink',
+							'transition-[opacity,color] duration-150 ease-out',
+							'opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100'
+						].join(' ')}
+					>
+						<PencilIcon />
+					</button>
+
 					<button
 						type='button'
 						onClick={onRequestDelete}
 						aria-label='Видалити бажання'
 						tabIndex={confirmingDelete ? -1 : 0}
 						className={[
-							'inline-flex h-8 w-8 items-center justify-center rounded-control text-ember',
+							'inline-flex h-11 w-11 items-center justify-center rounded-control text-ember',
 							'transition-opacity duration-150 ease-out',
 							'opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100'
 						].join(' ')}

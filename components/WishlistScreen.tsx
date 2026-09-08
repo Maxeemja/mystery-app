@@ -274,6 +274,7 @@ export function WishlistScreen() {
                   if (highlightId === wish.id) scrollHighlightIntoView(element)
                 }}
                 onToggleDone={() => void toggleDone(wish.id)}
+                onEdit={() => router.push(`/edit/${wish.id}`)}
                 onRequestDelete={() => requestDelete(wish.id)}
                 onCancelDelete={() => setConfirmingId(null)}
                 onConfirmDelete={() => confirmDelete(wish.id)}

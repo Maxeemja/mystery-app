@@ -64,7 +64,6 @@
 	--color-ink-soft: #171717; /* solid badge background, secondary ink */
 	--color-mid-gray: #737373; /* muted body text, placeholders, helper labels */
 	--color-hairline: #e5e5e5; /* borders, focus ring, badge outlines */
-	--color-green: oklch(79.2% 0.209 151.711);
 	/* The two chromatic exceptions — see invariant 1 above. */
 	--color-ember: #e7000b; /* destructive + inline errors ONLY */
 	--color-confetti-amber: #f59e0b; /* Share screen banner background ONLY */
