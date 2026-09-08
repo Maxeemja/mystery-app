@@ -1,7 +1,7 @@
-import type { Metadata, Viewport } from 'next'
-import { GeistSans } from 'geist/font/sans'
+import type { Metadata, Viewport } from 'next';
+import { GeistSans } from 'geist/font/sans';
 
-import '../styles/theme.css'
+import '../styles/theme.css';
 
 /**
  * Server shell. Everything that touches wishes or the profile is client-side
@@ -14,24 +14,24 @@ import '../styles/theme.css'
  */
 
 export const metadata: Metadata = {
-  title: 'Wishlist',
-  description: 'Список бажань, яким приємно поділитися',
-}
+	title: 'TinyWishlist',
+	description: 'Список бажань, яким приємно поділитися'
+};
 
 export const viewport: Viewport = {
-  themeColor: '#f5f5f5',
-  width: 'device-width',
-  initialScale: 1,
-}
+	themeColor: '#f5f5f5',
+	width: 'device-width',
+	initialScale: 1
+};
 
 export default function RootLayout({
-  children,
+	children
 }: {
-  children: React.ReactNode
+	children: React.ReactNode;
 }) {
-  return (
-    <html lang="uk" className={GeistSans.variable}>
-      <body>{children}</body>
-    </html>
-  )
+	return (
+		<html lang='uk' className={GeistSans.variable}>
+			<body>{children}</body>
+		</html>
+	);
 }
