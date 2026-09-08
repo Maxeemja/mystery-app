@@ -23,6 +23,13 @@ interface ImageUploadProps {
   onClear: () => void
   /** Dimmed while an emoji is chosen — the two are mutually exclusive. */
   dimmed: boolean
+  /**
+   * An image the wish already has, on the edit screen. It is a remote
+   * Cloudinary URL rather than a Blob, so it cannot go through `file` — there
+   * is nothing to create an object URL from, and downloading it just to make
+   * one would be pointless. A freshly picked `file` takes precedence over it.
+   */
+  existingUrl?: string | null
 }
 
 export function ImageUpload({
@@ -30,21 +37,24 @@ export function ImageUpload({
   onSelect,
   onClear,
   dimmed,
+  existingUrl = null,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<ImageRejection | null>(null)
   const [dragging, setDragging] = useState(false)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [objectUrl, setObjectUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (!file) {
-      setPreviewUrl(null)
+      setObjectUrl(null)
       return
     }
     const url = URL.createObjectURL(file)
-    setPreviewUrl(url)
+    setObjectUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [file])
+
+  const previewUrl = objectUrl ?? existingUrl
 
   function accept(candidate: File | undefined) {
     if (!candidate) return
@@ -57,10 +67,12 @@ export function ImageUpload({
     return (
       <div className="flex items-start gap-3">
         <div className="relative">
-          {/* eslint-disable-next-line @next/next/no-img-element -- local object URL */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- object URL, or
+              a Cloudinary URL when editing an existing wish */}
           <img
             src={previewUrl}
             alt=""
+            crossOrigin={objectUrl ? undefined : 'anonymous'}
             className="h-20 w-20 rounded-media object-cover"
           />
           <button
