@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!--
+    Favicon — a 🎁 as text rather than a drawn shape or a binary asset.
+
+    The XML prolog above is required, not decoration. Next serves this as
+    `image/svg+xml` with no `charset`, and the file's only non-ASCII content is
+    the emoji itself — so without a declared encoding the parser falls back to
+    Latin-1, mangles the multi-byte glyph and draws an empty box. Verified: the
+    same bytes render correctly when handed to the parser as a data URI (which
+    carries its own encoding) and incorrectly when fetched over HTTP.
+
+    App Router picks `app/icon.svg` up by filename, so this needs no metadata
+    wiring. Treating the emoji as typography rather than as an illustration is
+    the same rule the app follows for wish media (docs/spec.md §8), now applied
+    to the browser chrome too.
+
+    `font-size: 28` with the baseline at y=25 makes the glyph fill the 32×32
+    viewBox — at a default size it renders as a dot in the corner.
+
+    Deliberately no `font-family`. Naming the platform emoji fonts
+    ('Apple Color Emoji', 'Segoe UI Emoji', …) looks more careful but is worse:
+    a favicon is rendered in SVG-as-image mode, and when none of the named
+    families resolve on the host, the glyph fails to draw at all instead of
+    falling back. Verified: with the font stack it rendered as an empty box,
+    without it the renderer's own default draws the emoji correctly. The glyph
+    carries its own colors, so it needs no fill and reads on light and dark
+    tab bars alike.
+  -->
+  <text x="16" y="25" font-size="28" text-anchor="middle">🎁</text>
+</svg>

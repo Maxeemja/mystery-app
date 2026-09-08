@@ -22,7 +22,9 @@ export function Select({
   return (
     <select
       className={[
-        'h-10 appearance-none rounded-control border border-transparent bg-canvas',
+        // Resting hairline for the same reason as TextField — see the note
+        // there; the two controls have to agree or the price row looks broken.
+        'h-10 appearance-none rounded-control border border-hairline bg-canvas',
         'py-2 pr-8 pl-3 text-body text-ink',
         'transition-colors duration-150 ease-out focus:bg-paper',
         className,

@@ -235,15 +235,22 @@ export function AddScreen() {
                 Скільки коштує
               </label>
               <div className="flex gap-2">
-                <input
-                  id="wish-price"
-                  inputMode="numeric"
-                  value={price}
-                  placeholder="0"
-                  autoComplete="off"
-                  onChange={(event) => setPrice(formatPriceInput(event.target.value))}
-                  className="h-10 flex-1 rounded-control border border-transparent bg-canvas px-3 text-body text-ink transition-colors duration-150 ease-out placeholder:text-mid-gray focus:bg-paper"
-                />
+                {/* Was a hand-rolled copy of TextField's classes, which is how
+                    it drifted out of step with the primitive. The label is
+                    rendered above the row rather than by the field, so no
+                    `label` prop here. */}
+                <div className="flex-1">
+                  <TextField
+                    id="wish-price"
+                    inputMode="numeric"
+                    value={price}
+                    placeholder="0"
+                    autoComplete="off"
+                    onChange={(event) =>
+                      setPrice(formatPriceInput(event.target.value))
+                    }
+                  />
+                </div>
                 <Select
                   aria-label="Валюта"
                   value={currency}

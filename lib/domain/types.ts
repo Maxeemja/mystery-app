@@ -22,7 +22,17 @@ export const DEFAULT_CURRENCY: Currency = 'UAH'
 /** Fallback glyph when the user picks neither an emoji nor an image. */
 export const DEFAULT_EMOJI = '🎁'
 
-/** The eight offered emoji (interactions.md §3.2). */
+/**
+ * The offered emoji (interactions.md §3.2).
+ *
+ * The original eight covered gifts, books, travel, audio, shoes, tech, games
+ * and coffee. The five added below fill the obvious gaps rather than adding
+ * more of the same: self-care, home/plants, sport, food and hobbies. One glyph
+ * per category — the picker is a shortcut for the common case, not a catalogue,
+ * and a long grid would slow down the decision it exists to speed up.
+ *
+ * The row wraps, so growing this list needs no layout change.
+ */
 export const EMOJI_CHOICES = [
   '🎁',
   '📚',
@@ -32,6 +42,11 @@ export const EMOJI_CHOICES = [
   '💻',
   '🎮',
   '☕',
+  '🧴',
+  '🪴',
+  '🚲',
+  '🍰',
+  '🎨',
 ] as const
 
 export interface Wish {
