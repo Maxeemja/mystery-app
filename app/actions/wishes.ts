@@ -1,8 +1,10 @@
 'use server'
 
 import { requireUserId } from '../../lib/auth/session'
+import { destroyImage, uploadImage } from '../../lib/images/cloudinary'
 import {
   CURRENCIES,
+  rejectImage,
   validateName,
   validateTitle,
   type Currency,
@@ -44,7 +46,16 @@ export async function listWishesAction(): Promise<Wish[]> {
   return wishRepository.list(userId)
 }
 
-export async function createWishAction(input: NewWishInput): Promise<Wish> {
+/**
+ * `image` is the already-compressed blob from the Add form. It arrives as a
+ * real `File` — React serializes those across the action boundary — so the
+ * bytes never touch Cloudinary directly from the browser, and the API secret
+ * never has to leave the server (docs/stage-2.md §7).
+ */
+export async function createWishAction(
+  input: NewWishInput,
+  image?: File
+): Promise<Wish> {
   const userId = await requireUserId()
 
   const title = validateTitle(input.title)
@@ -59,9 +70,19 @@ export async function createWishAction(input: NewWishInput): Promise<Wish> {
       ? input.price
       : undefined
 
+  let uploaded: { imageUrl: string; imagePublicId: string } | undefined
+  if (image) {
+    // Re-checked here even though ImageUpload already rejected bad files: the
+    // client check is a courtesy, this is the boundary.
+    if (rejectImage(image)) throw new Error('Rejected image')
+    uploaded = await uploadImage(new Uint8Array(await image.arrayBuffer()))
+  }
+
   return wishRepository.create(userId, {
     title: title.value,
-    ...(input.emoji ? { emoji: input.emoji } : {}),
+    // Emoji and image stay mutually exclusive on the way in, exactly as the
+    // form enforces them (interactions.md §3.3).
+    ...(uploaded ? uploaded : { emoji: input.emoji }),
     ...(price !== undefined ? { price, currency } : {}),
     ...(input.url ? { url: input.url } : {}),
   })
@@ -77,7 +98,12 @@ export async function setWishDoneAction(
 
 export async function removeWishAction(id: string): Promise<void> {
   const userId = await requireUserId()
-  await wishRepository.remove(userId, id)
+  const removed = await wishRepository.remove(userId, id)
+
+  // The wish is already gone at this point, and `destroyImage` swallows its own
+  // failures — so a Cloudinary outage orphans a file but never resurrects a
+  // wish the user asked to delete (docs/stage-2.md §7).
+  if (removed?.imagePublicId) await destroyImage(removed.imagePublicId)
 }
 
 export async function renameProfileAction(rawName: string): Promise<void> {

@@ -34,7 +34,16 @@ export interface WishRepository {
   list(userId: string): Promise<Wish[]>
   create(userId: string, data: NewWish): Promise<Wish>
   update(userId: string, id: string, patch: WishPatch): Promise<Wish>
-  remove(userId: string, id: string): Promise<void>
+  /**
+   * Returns the wish that was removed, or null when nothing matched (wrong
+   * owner, or already gone).
+   *
+   * It returns the document rather than void so the caller can destroy the
+   * wish's Cloudinary file, which needs the `imagePublicId` that is about to
+   * disappear. Reading it back separately first would be a race: two concurrent
+   * deletes would both read the id and both try to destroy the same file.
+   */
+  remove(userId: string, id: string): Promise<Wish | null>
 }
 
 export interface ProfileRepository {

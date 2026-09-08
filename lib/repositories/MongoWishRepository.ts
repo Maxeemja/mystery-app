@@ -63,13 +63,17 @@ export class MongoWishRepository implements WishRepository {
     return toDomain(updated)
   }
 
-  async remove(userId: string, id: string): Promise<void> {
+  async remove(userId: string, id: string): Promise<Wish | null> {
     const owner = toObjectId(userId)
     const target = toObjectId(id)
-    if (!owner || !target) return
+    if (!owner || !target) return null
 
     const wishes = await wishesCollection()
-    await wishes.deleteOne({ _id: target, userId: owner })
+    // findOneAndDelete rather than deleteOne: the caller needs the doomed
+    // document's `imagePublicId` to clean up Cloudinary, and doing it in one
+    // atomic step means two concurrent deletes can't both claim the same file.
+    const deleted = await wishes.findOneAndDelete({ _id: target, userId: owner })
+    return deleted ? toDomain(deleted) : null
   }
 
   /** Backs the stage-3 hard limit; counts done wishes too (docs/stage-2.md §4). */

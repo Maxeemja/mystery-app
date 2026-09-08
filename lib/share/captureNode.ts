@@ -19,9 +19,17 @@
 import { toBlob } from 'html-to-image'
 
 export async function captureNodeAsPng(node: HTMLElement): Promise<Blob> {
+  // Cloudinary images are cross-origin, and html-to-image inlines every image
+  // it finds by fetching it first. Without `fetchRequestInit`, that fetch is
+  // a default same-origin-credentialled request that Cloudinary's `ACAO: *`
+  // cannot satisfy, and the image silently drops out of the PNG. Asking for
+  // CORS mode without credentials is what the wildcard header allows.
+  // The matching `crossOrigin="anonymous"` on the elements themselves (see
+  // WishMedia) keeps the canvas untainted; both halves are required.
   const blob = await toBlob(node, {
     backgroundColor: '#f5f5f5',
     pixelRatio: 2,
+    fetchRequestInit: { mode: 'cors', credentials: 'omit' },
   })
   if (!blob) throw new Error('PNG export produced no data')
   return blob

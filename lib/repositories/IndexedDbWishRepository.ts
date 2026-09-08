@@ -52,11 +52,14 @@ export class IndexedDbWishRepository implements WishRepository {
     })
   }
 
-  async remove(userId: string, id: string): Promise<void> {
-    await withStore(STORE_WISHES, 'readwrite', async ([store]) => {
+  async remove(userId: string, id: string): Promise<Wish | null> {
+    return withStore(STORE_WISHES, 'readwrite', async ([store]) => {
       const existing = await request(store!.get(id) as IDBRequest<Wish | undefined>)
-      if (!existing || existing.userId !== userId) return
+      if (!existing || existing.userId !== userId) return null
       await request(store!.delete(id))
+      // Local wishes hold a Blob, not a Cloudinary id, so nothing downstream
+      // will act on this — it is returned only to satisfy the shared contract.
+      return existing
     })
   }
 }

@@ -117,18 +117,28 @@ export function AddScreen() {
     setSaving(true)
     setSaveFailed(false)
     try {
-      const created = await createWishAction({
-        title: validateTitle(title).value,
-        // Images are not carried across this stage: a Blob cannot travel to
-        // Mongo, and Cloudinary is wired up in the next one. Until then a wish
-        // saves with its emoji (or the default glyph). The picker, compression
-        // and validation are all left in place for that stage to reconnect.
-        emoji: emoji ?? DEFAULT_EMOJI,
-        ...(parsePriceInput(price) !== undefined
-          ? { price: parsePriceInput(price), currency }
-          : {}),
-        ...(normalizeUrl(url) ? { url: normalizeUrl(url) } : {}),
-      })
+      // Still compressed here, before anything leaves the browser — uploading
+      // the original would spend the user's bandwidth and Cloudinary's quota on
+      // pixels that get thrown away (interactions.md §3.3).
+      const compressed =
+        image instanceof File ? await compressImage(image) : image
+      const upload = compressed
+        ? new File([compressed], 'wish', { type: compressed.type })
+        : undefined
+
+      const created = await createWishAction(
+        {
+          title: validateTitle(title).value,
+          // Only meaningful when there's no image; the two are mutually
+          // exclusive and the action honours that.
+          emoji: emoji ?? DEFAULT_EMOJI,
+          ...(parsePriceInput(price) !== undefined
+            ? { price: parsePriceInput(price), currency }
+            : {}),
+          ...(normalizeUrl(url) ? { url: normalizeUrl(url) } : {}),
+        },
+        upload
+      )
       // Picked up and cleared by the hub screen (interactions.md §2.8).
       sessionStorage.setItem(HIGHLIGHT_KEY, created.id)
       leave()
