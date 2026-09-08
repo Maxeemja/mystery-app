@@ -20,9 +20,17 @@ const { auth } = NextAuth({ session: { strategy: 'jwt' }, providers: [] })
 /** Everything else is public: `/login`, `/register`, `/w/{token}`. */
 const PROTECTED = ['/', '/add', '/share']
 
+/**
+ * Dynamic routes that need a session. Matched by prefix because the id varies —
+ * an exact-match list cannot express `/edit/{id}`.
+ */
+const PROTECTED_PREFIXES = ['/edit/']
+
 export default auth((request) => {
   const { pathname } = request.nextUrl
-  const isProtected = PROTECTED.includes(pathname)
+  const isProtected =
+    PROTECTED.includes(pathname) ||
+    PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix))
   if (!isProtected || request.auth) return NextResponse.next()
 
   const login = new URL('/login', request.nextUrl)

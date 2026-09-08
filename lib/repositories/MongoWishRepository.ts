@@ -23,6 +23,19 @@ export class MongoWishRepository implements WishRepository {
     return docs.map(toDomain)
   }
 
+  async find(userId: string, id: string): Promise<Wish | null> {
+    const owner = toObjectId(userId)
+    const target = toObjectId(id)
+    if (!owner || !target) return null
+
+    const wishes = await wishesCollection()
+    // Owner folded into the filter, exactly as in `update` and `remove`: a
+    // foreign id matches zero documents rather than being fetched and then
+    // compared, so there is no window in which the wrong document is in hand.
+    const doc = await wishes.findOne({ _id: target, userId: owner })
+    return doc ? toDomain(doc) : null
+  }
+
   async create(userId: string, data: NewWish): Promise<Wish> {
     const owner = toObjectId(userId)
     if (!owner) throw new Error('Invalid user id')

@@ -32,6 +32,13 @@ import type { NewWish, Profile, Wish, WishPatch } from '../domain/types'
 
 export interface WishRepository {
   list(userId: string): Promise<Wish[]>
+  /**
+   * One wish by id, scoped to its owner. Returns null both when the id belongs
+   * to somebody else and when it does not exist — the caller must not be able
+   * to tell those apart, or the difference becomes a way to probe which ids are
+   * real (docs/prompter-task-edit-wish.md §5).
+   */
+  find(userId: string, id: string): Promise<Wish | null>
   create(userId: string, data: NewWish): Promise<Wish>
   update(userId: string, id: string, patch: WishPatch): Promise<Wish>
   /**

@@ -6,6 +6,8 @@ import { destroyImage, uploadImage } from '../../lib/images/cloudinary'
 import { buildShareUrl } from '../../lib/share/shareUrl'
 import {
   CURRENCIES,
+  DEFAULT_CURRENCY,
+  DEFAULT_EMOJI,
   WISH_LIMIT,
   rejectImage,
   validateName,
@@ -13,6 +15,7 @@ import {
   type Currency,
   type Profile,
   type Wish,
+  type WishPatch,
 } from '../../lib/domain'
 import { profileRepository, wishRepository } from '../../lib/repositories/server'
 
@@ -119,6 +122,121 @@ export async function createWishAction(
     ...(price !== undefined ? { price, currency } : {}),
     ...(input.url ? { url: input.url } : {}),
   })
+}
+
+/**
+ * What the edit form may change — docs/prompter-task-edit-wish.md §3.3, §4.
+ *
+ * Notably absent, and absent on purpose:
+ * - `isDone` belongs to the ✓ button on the card, not to this form.
+ * - `createdAt` is never written: list position is derived from it, so fixing a
+ *   typo must not fling the card to the top of the list (§3.4).
+ * - `imageUrl` / `imagePublicId` are server-derived from an actual upload. If a
+ *   caller could set them, it could point a card at any URL and orphan the real
+ *   Cloudinary file — the same reasoning as the note at the top of this file.
+ */
+export interface EditWishInput {
+  title: string
+  emoji?: string
+  price?: number
+  currency?: Currency
+  url?: string
+  /** True when the user cleared the existing image with «×» (§4). */
+  removeImage?: boolean
+}
+
+/**
+ * Result rather than a bare throw, because "this wish is already gone" is an
+ * expected outcome the form must tell apart from a generic failure: it shows
+ * «Це бажання вже видалене» and leaves for the list (§6). Error identity does
+ * not survive the Server Action boundary, so a thrown subclass could not carry
+ * that distinction.
+ */
+export type UpdateWishResult =
+  | { ok: true; wish: Wish }
+  | { ok: false; reason: 'not-found' }
+
+export async function updateWishAction(
+  id: string,
+  input: EditWishInput,
+  image?: File
+): Promise<UpdateWishResult> {
+  const userId = await requireUserId()
+
+  const title = validateTitle(input.title)
+  if (!title.valid) throw new Error('Invalid title')
+
+  // No 30-wish check here: editing creates no records (§7).
+
+  // Read first, only to learn which file may need destroying afterwards. The
+  // write below is still scoped by owner in its own filter, so this read is not
+  // load-bearing for security.
+  const existing = await wishRepository.find(userId, id)
+  if (!existing) return { ok: false, reason: 'not-found' }
+
+  const currency =
+    input.currency && CURRENCIES.includes(input.currency)
+      ? input.currency
+      : undefined
+  const price =
+    typeof input.price === 'number' && Number.isFinite(input.price) && input.price >= 0
+      ? input.price
+      : undefined
+
+  let uploaded: { imageUrl: string; imagePublicId: string } | undefined
+  if (image) {
+    if (rejectImage(image)) throw new Error('Rejected image')
+    uploaded = await uploadImage(new Uint8Array(await image.arrayBuffer()))
+  }
+
+  const clearing = !uploaded && input.removeImage === true
+
+  // `null` where a field should be cleared, not `undefined` — the latter means
+  // "leave as is", so emptying the price box would silently keep the old price.
+  const patch: WishPatch = {
+    title: title.value,
+    price: price ?? null,
+    currency: price !== undefined ? (currency ?? DEFAULT_CURRENCY) : null,
+    url: input.url || null,
+    ...(uploaded
+      ? uploaded
+      : clearing
+        ? {
+            // Falls back to the chosen emoji, or the default glyph — a card
+            // must never end up with neither image nor emoji (§4).
+            imageUrl: null,
+            imagePublicId: null,
+            emoji: input.emoji || DEFAULT_EMOJI,
+          }
+        : { emoji: input.emoji || DEFAULT_EMOJI }),
+  }
+
+  let updated: Wish
+  try {
+    updated = await wishRepository.update(userId, id, patch)
+  } catch (error) {
+    // The write failed. If we had just uploaded a replacement, it is now
+    // referenced by nothing — destroy it rather than leave it orphaned. The old
+    // file is untouched, so the wish keeps the image it already had.
+    if (uploaded) await destroyImage(uploaded.imagePublicId)
+    // Deleted from another tab between the read above and this write.
+    if (isNotFound(error)) return { ok: false, reason: 'not-found' }
+    throw error
+  }
+
+  // Only now, after the record is safely written, is the old file expendable.
+  // Destroying it first would leave the wish with no image at all if the write
+  // then failed (§4).
+  const replaced = uploaded || clearing
+  if (replaced && existing.imagePublicId) {
+    await destroyImage(existing.imagePublicId)
+  }
+
+  return { ok: true, wish: updated }
+}
+
+function isNotFound(error: unknown): boolean {
+  return error instanceof Error && error.message.endsWith('not found')
 }
 
 export async function setWishDoneAction(

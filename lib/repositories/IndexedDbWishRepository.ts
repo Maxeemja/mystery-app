@@ -24,6 +24,16 @@ export class IndexedDbWishRepository implements WishRepository {
     })
   }
 
+  async find(userId: string, id: string): Promise<Wish | null> {
+    return withStore(STORE_WISHES, 'readonly', async ([store]) => {
+      const found = await request(store!.get(id) as IDBRequest<Wish | undefined>)
+      // Same rule as the Mongo implementation: a wish belonging to someone else
+      // is reported as absent, not as forbidden.
+      if (!found || found.userId !== userId) return null
+      return found
+    })
+  }
+
   /**
    * The 30-wish cap is an account-side rule, so nothing enforces it against
    * this store — but the contract asks for a count, and answering it honestly
@@ -59,7 +69,22 @@ export class IndexedDbWishRepository implements WishRepository {
       if (!existing || existing.userId !== userId) {
         throw new Error(`Wish ${id} not found`)
       }
-      const next: Wish = { ...existing, ...patch, id: existing.id, userId: existing.userId }
+      // A patch uses `null` to mean "clear this field" and `undefined` to mean
+      // "leave it alone", while the domain type expresses absence as
+      // `undefined` only. Spreading the patch directly would store nulls that
+      // the UI's `?? fallback` checks do not treat as absent.
+      const merged: Record<string, unknown> = { ...existing }
+      for (const [key, value] of Object.entries(patch)) {
+        if (value === undefined) continue
+        if (value === null) delete merged[key]
+        else merged[key] = value
+      }
+      // Identity is not patchable — re-keying a record onto another account is
+      // exactly what the owner scope exists to prevent.
+      merged.id = existing.id
+      merged.userId = existing.userId
+
+      const next = merged as unknown as Wish
       await request(store!.put(next))
       return next
     })

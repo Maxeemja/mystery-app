@@ -100,7 +100,25 @@ export interface NewWish {
  * there to prevent. `createdAt` stays patchable because seeding and stage-3
  * migration both need to preserve original timestamps.
  */
-export type WishPatch = Partial<Omit<Wish, 'id' | 'userId'>>
+export type WishPatch = Partial<{
+  title: string
+  emoji: string
+  /**
+   * The optional value fields accept `null` as well as a value, because editing
+   * has to be able to *clear* them — emptying the price field, or removing an
+   * image with «×». `Partial<Omit<Wish, …>>` could only ever say "leave this
+   * alone" (`undefined`) or "set it", never "unset it", which made the
+   * implementations' own `?? null` handling unreachable.
+   */
+  image: Blob | null
+  imageUrl: string | null
+  imagePublicId: string | null
+  price: number | null
+  currency: Currency | null
+  url: string | null
+  isDone: boolean
+  createdAt: number
+}>
 
 export interface Profile {
   userId: string
