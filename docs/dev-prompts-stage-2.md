@@ -17,7 +17,7 @@
 | 2 | Cloudinary — підписане завантаження, життєвий цикл `public_id` |
 | 3 | Міграція локальних даних + ліміт 30 бажань |
 | 4 | Посилання на список + гостьовий екран `/w/{token}` |
-| 5 | Приймання + регресія етапу 1 |
+| 5 | Приймання + регресія етапу 1 + фавіконка й видимість інпутів |
 
 **Приймання** — `prompter-task-stage-2.md §9`, прогоняється вживу.
 
@@ -242,7 +242,7 @@ Implement the owner's link field first, then the guest screen. Verify: the link 
 Act as a senior QA-minded engineer doing the final pass over stage 2.
 
 ## Task
-Run the full acceptance checklist, and verify stage 1 didn't regress.
+Run the full acceptance checklist, verify stage 1 didn't regress, and apply the two scoped fixes described under "Implementation" below.
 
 ## Context
 Read docs/prompter-task-stage-2.md §8 (what must not change) and §9 (the checklist), plus docs/stage-2.md §8–§9 and docs/interactions.md §7 (stage 1's own checklist).
@@ -264,9 +264,37 @@ Then re-run stage 1's checklist (interactions.md §7) against the now-cloud-back
 - A mutation Server Action invoked while unauthenticated, and while signed in as a different account, is rejected in both cases.
 - `/w/{token}` with a nonexistent token returns not-found, not a 500.
 
+## Implementation — two scoped additions
+
+These two are explicitly requested and are the only feature work in this stage.
+
+### 1. Favicon — gift emoji
+
+Add a 🎁 favicon using `app/icon.svg`: an SVG whose content is the emoji as a `<text>` element. App Router picks that filename up automatically, so it needs no metadata wiring and no binary asset. It also keeps the project's own rule that emoji are typography rather than graphics (spec.md §8) true for the app chrome as well.
+
+- Size the glyph so it fills the viewBox — a default-size emoji in a 32×32 viewBox renders as a tiny dot in the corner.
+- Verify in a real browser tab, not just that the file is served. Check it against both a light and a dark browser theme.
+
+### 2. Inputs are invisible against the page background
+
+**Verify the root cause before changing anything.** `--color-canvas: #f5f5f5` in `styles/theme.css` is used as both the page background and the input resting fill — the token comment says so outright. `body` is set to canvas, and `components/ui/TextField.tsx` renders `bg-canvas` with `border-transparent`. So an input sitting directly on the page background is `#f5f5f5` on `#f5f5f5` — it has no visible edge until focus, where `focus:bg-paper` inverts it. Inside a card the same fill reads correctly (`components/AddScreen.tsx` wraps its form in `bg-paper`), which is what style-guide.md assumed: the soft gray fill is described as differentiating the input *from the card surface beneath it*. The guide never anticipated an input placed directly on canvas — which is exactly the case on `/login`, `/register` and `/init`.
+
+**Fix:** give the input primitive a resting hairline border (`#e5e5e5` — an existing token) instead of `border-transparent`, so the shape is defined regardless of the surface underneath. Leave the focus treatment as it is.
+
+If you would rather not deviate from the style guide at all, the alternative is to wrap the auth-screen forms in a standard Card (`bg-paper`, 24px radius, hairline border, subtle shadow) so the existing fill works as designed. Pick one approach, say which and why — do not do both, and do not introduce a new color, fill, or token either way.
+
+**Apply the fix everywhere the pattern is duplicated,** or the forms end up internally inconsistent:
+- `components/ui/TextField.tsx`
+- `components/ui/Select.tsx`
+- the inline price input in `components/AddScreen.tsx`, which hand-rolls the same classes instead of using the primitive — consolidate it onto the primitive while you're in there, unless something about it genuinely needs to differ.
+
+**Check the same root cause for buttons.** `components/ui/Button.tsx` uses `bg-canvas` + `border-transparent` for both the ghost variant and the disabled state, so on a canvas-background screen those are equally edgeless. The visible symptoms are the disabled «Далі» on `/init` and «Створити акаунт» on `/register`. Resolve them consistently with whatever you chose above.
+
+**Verify:** on `/login`, `/register`, `/init` and `/add`, every input, select, and ghost or disabled button has a discernible edge against its background *before* focus, at both mobile and desktop widths. Radii stay 18px, focus behavior is unchanged, and no new color or token was added.
+
 ## Constraints
-Do not add anything from stage-2.md §9 or prompter-task-stage-2.md §8: no password reset, no social login, no link regeneration, no private lists, no guest reservations, no comments or likes, no wish editing, no offline mode. If you find a real problem outside stage 2's scope, report it rather than fixing it.
+Do not add anything from stage-2.md §9 or prompter-task-stage-2.md §8: no password reset, no social login, no link regeneration, no private lists, no guest reservations, no comments or likes, no wish editing, no offline mode. This exclusion does not cover the two additions above — those are requested. If you find any *other* real problem outside stage 2's scope, report it rather than fixing it.
 
 ## Format
-Report the checklist as a pass/fail list with the evidence for each — what you did and what you observed. Fix what's genuinely broken in stage 2's scope; for anything you couldn't verify, say so explicitly rather than marking it passed.
+Report the checklist as a pass/fail list with the evidence for each — what you did and what you observed. Fix what's genuinely broken in stage 2's scope; for anything you couldn't verify, say so explicitly rather than marking it passed. Report the two additions separately, including which input-visibility approach you chose.
 ```
