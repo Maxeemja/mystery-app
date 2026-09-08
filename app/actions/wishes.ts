@@ -1,7 +1,9 @@
 'use server'
 
 import { requireUserId } from '../../lib/auth/session'
+import { findShareTokenByUserId } from '../../lib/auth/users'
 import { destroyImage, uploadImage } from '../../lib/images/cloudinary'
+import { buildShareUrl } from '../../lib/share/shareUrl'
 import {
   CURRENCIES,
   WISH_LIMIT,
@@ -35,6 +37,18 @@ export interface NewWishInput {
   price?: number
   currency?: Currency
   url?: string
+}
+
+/** The owner's own public link, for the Share screen (docs/stage-2.md §5.1). */
+export async function getShareUrlAction(): Promise<string | null> {
+  const userId = await requireUserId()
+  const token = await findShareTokenByUserId(userId)
+  if (!token) return null
+
+  // `AUTH_URL` is the origin the app is actually served from and is already
+  // required by Auth.js; a second variable for the same fact would drift.
+  const origin = process.env.AUTH_URL ?? 'http://localhost:3000'
+  return buildShareUrl(token, origin)
 }
 
 export async function countWishesAction(): Promise<number> {

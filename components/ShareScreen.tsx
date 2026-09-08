@@ -22,6 +22,7 @@ import {
 	sortWishes
 } from '../lib/domain';
 import { buildShareText, captureNodeAsPng } from '../lib/share';
+import { getShareUrlAction } from '../app/actions/wishes';
 
 const COPIED_LABEL_MS = 2000;
 
@@ -31,9 +32,19 @@ export function ShareScreen() {
 	const { status, wishes } = useWishes();
 
 	const [copied, setCopied] = useState(false);
+	const [linkCopied, setLinkCopied] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [saveFailed, setSaveFailed] = useState(false);
 	const captureRef = useRef<HTMLDivElement>(null);
+
+	// The owner's own public link (docs/stage-2.md §5.1). Resolved server-side
+	// from the session, so the token is never derived on the client.
+	const [shareUrl, setShareUrl] = useState<string | null>(null);
+	useEffect(() => {
+		getShareUrlAction()
+			.then(setShareUrl)
+			.catch(() => setShareUrl(null));
+	}, []);
 
 	useEffect(() => {
 		if (profileStatus === 'ready' && !profile) router.replace('/login');
@@ -73,7 +84,10 @@ export function ShareScreen() {
 
 		if (navigator.share) {
 			try {
-				await navigator.share({ text });
+				// Text *and* url, so messengers render a clickable preview instead
+				// of a bare paragraph (docs/stage-2.md §5.2). The text itself is
+				// unchanged from stage 1.
+				await navigator.share(shareUrl ? { text, url: shareUrl } : { text });
 			} catch {
 				// Cancelled, or genuinely failed — either way nothing happens
 				// (interactions.md §4.2: "нічого не відбувається, повідомлення немає").
@@ -82,11 +96,31 @@ export function ShareScreen() {
 		}
 
 		try {
-			await navigator.clipboard.writeText(text);
+			// Desktop fallback: the link goes on the clipboard together with the
+			// text, otherwise the recipient gets a list they can't open.
+			await navigator.clipboard.writeText(
+				shareUrl ? `${text}\n\n${shareUrl}` : text
+			);
 			setCopied(true);
 			setTimeout(() => setCopied(false), COPIED_LABEL_MS);
 		} catch {
 			// No clipboard permission — no UI is specified for this case either.
+		}
+	}
+
+	async function copyLink() {
+		if (!shareUrl) return;
+		try {
+			await navigator.clipboard.writeText(shareUrl);
+			setLinkCopied(true);
+			setTimeout(() => setLinkCopied(false), COPIED_LABEL_MS);
+		} catch {
+			// The Clipboard API needs a secure context — it is unavailable over
+			// plain http on anything but localhost. Deliberately leaving the label
+			// alone rather than flipping it: a button that says «Скопійовано ✓»
+			// when nothing was copied is worse than one that appears to do
+			// nothing, and the URL is selectable in the field either way.
+			setLinkCopied(false);
 		}
 	}
 
@@ -157,6 +191,32 @@ export function ShareScreen() {
 					</div>
 				)}
 			</div>
+
+			{/* The live link. Read-only rather than disabled, so it stays
+			    selectable and copyable by hand if the Clipboard API is
+			    unavailable (docs/stage-2.md §5.2). */}
+			{shareUrl ? (
+				<div className='mt-6'>
+					<label
+						htmlFor='share-link'
+						className='mb-2 block text-body font-medium text-ink'
+					>
+						Посилання на список
+					</label>
+					<div className='flex gap-2'>
+						<input
+							id='share-link'
+							readOnly
+							value={shareUrl}
+							onFocus={(event) => event.target.select()}
+							className='h-10 flex-1 rounded-control border border-hairline bg-canvas px-3 text-body text-ink'
+						/>
+						<Button variant='outline' onClick={() => void copyLink()}>
+							{linkCopied ? 'Скопійовано ✓' : 'Копіювати'}
+						</Button>
+					</div>
+				</div>
+			) : null}
 
 			{status === 'error' ? (
 				<p className='mt-4 text-body text-ember'>
