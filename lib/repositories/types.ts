@@ -44,6 +44,12 @@ export interface WishRepository {
    * deletes would both read the id and both try to destroy the same file.
    */
   remove(userId: string, id: string): Promise<Wish | null>
+  /**
+   * Total wishes for the owner, done ones included — it backs the 30-wish hard
+   * lock (docs/stage-2.md §4), which is a storage limit rather than a product
+   * rule, so completed wishes take up a slot like any other.
+   */
+  count(userId: string): Promise<number>
 }
 
 export interface ProfileRepository {

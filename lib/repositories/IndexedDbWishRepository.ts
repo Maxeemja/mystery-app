@@ -24,6 +24,19 @@ export class IndexedDbWishRepository implements WishRepository {
     })
   }
 
+  /**
+   * The 30-wish cap is an account-side rule, so nothing enforces it against
+   * this store — but the contract asks for a count, and answering it honestly
+   * costs one index read.
+   */
+  async count(userId: string): Promise<number> {
+    return withStore(STORE_WISHES, 'readonly', async ([store]) => {
+      const index = store!.index(INDEX_WISHES_BY_USER_CREATED)
+      const range = IDBKeyRange.bound([userId, -Infinity], [userId, Infinity])
+      return request(index.count(range) as IDBRequest<number>)
+    })
+  }
+
   async create(userId: string, data: NewWish): Promise<Wish> {
     const wish: Wish = {
       ...data,

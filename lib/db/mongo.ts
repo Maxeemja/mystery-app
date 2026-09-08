@@ -32,6 +32,18 @@ export interface UserDoc {
   name: string
   shareToken: string
   createdAt: Date
+  /**
+   * When the account's one-time bootstrap finished — either the stage-1 local
+   * data was migrated in, or the three defaults were seeded (docs/stage-2.md
+   * §6).
+   *
+   * Without this the two cases can't be told apart on a later login: once
+   * IndexedDB has been drained and cleared, a returning user looks exactly
+   * like a brand-new one, and the defaults would be re-seeded on every visit.
+   * It is set only after the work succeeds, so an interrupted migration
+   * retries on the next login instead of being written off as done.
+   */
+  bootstrappedAt?: Date
 }
 
 /** Shape of a `wishes` document — docs/stage-2.md §2. */

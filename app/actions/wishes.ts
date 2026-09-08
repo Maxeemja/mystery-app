@@ -4,6 +4,7 @@ import { requireUserId } from '../../lib/auth/session'
 import { destroyImage, uploadImage } from '../../lib/images/cloudinary'
 import {
   CURRENCIES,
+  WISH_LIMIT,
   rejectImage,
   validateName,
   validateTitle,
@@ -36,6 +37,11 @@ export interface NewWishInput {
   url?: string
 }
 
+export async function countWishesAction(): Promise<number> {
+  const userId = await requireUserId()
+  return wishRepository.count(userId)
+}
+
 export async function getProfileAction(): Promise<Profile | null> {
   const userId = await requireUserId()
   return profileRepository.get(userId)
@@ -60,6 +66,19 @@ export async function createWishAction(
 
   const title = validateTitle(input.title)
   if (!title.valid) throw new Error('Invalid title')
+
+  // The hard lock (docs/stage-2.md §4). The Add screen also disables its own
+  // button at 30, but that is convenience — this is the guarantee, and it holds
+  // even when the action is called directly. Checked before the Cloudinary
+  // upload so a rejected wish never leaves an orphaned file behind.
+  // Thrown, not returned: the caller's UI already prevents this, so reaching
+  // here means either a direct invocation or a genuine race, and both are
+  // failures rather than expected outcomes. The class-free throw is deliberate —
+  // a `'use server'` module may only export async functions, and error
+  // identity would not survive the action boundary anyway.
+  if ((await wishRepository.count(userId)) >= WISH_LIMIT) {
+    throw new Error('Wish limit reached')
+  }
 
   const currency =
     input.currency && CURRENCIES.includes(input.currency)

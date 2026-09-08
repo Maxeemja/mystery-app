@@ -11,17 +11,22 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Badge } from './ui/Badge'
-import { ButtonLink } from './ui/Button'
+import { Button, ButtonLink } from './ui/Button'
 import { EmptyState } from './wishlist/EmptyState'
 import { NameModal } from './wishlist/NameModal'
 import { ProfileMenu } from './wishlist/ProfileMenu'
 import { WishCard } from './wishlist/WishCard'
 import { useFlipReflow } from './wishlist/useFlipReflow'
+import { useBootstrap } from './useBootstrap'
 import { useProfile } from './useProfile'
 import { useWishes } from './useWishes'
 import {
+  LIMIT_REACHED_TEXT,
   applyFilter,
   formatCounter,
+  formatLimit,
+  isAtLimit,
+  shouldShowLimit,
   sortWishes,
   type WishFilter,
 } from '../lib/domain'
@@ -48,7 +53,9 @@ const REMOVE_ANIMATION_MS = 200
 export function WishlistScreen() {
   const router = useRouter()
   const { status: profileStatus, profile, setProfile } = useProfile()
-  const { status, wishes, total, done, saveError, toggleDone, remove } = useWishes()
+  const { status, wishes, total, done, saveError, toggleDone, remove, reload } =
+    useWishes()
+  const { status: bootstrapStatus, notice: bootstrapNotice } = useBootstrap()
 
   // Filter is never persisted: entering the screen or reloading resets it to
   // «Усі» (interactions.md §2.2). Plain state gives exactly that for free.
@@ -65,6 +72,13 @@ export function WishlistScreen() {
   useEffect(() => {
     if (profileStatus === 'ready' && !profile) router.replace('/login')
   }, [profileStatus, profile, router])
+
+  // The bootstrap writes wishes server-side after this screen's first read has
+  // already resolved, so pick them up once it reports finished.
+  const bootstrapSettled = bootstrapStatus === 'done' || bootstrapStatus === 'error'
+  useEffect(() => {
+    if (bootstrapSettled) void reload()
+  }, [bootstrapSettled, reload])
 
   // Esc closes whichever inline confirmation is open (interactions.md §0.3).
   useEffect(() => {
@@ -165,6 +179,7 @@ export function WishlistScreen() {
 
   const showFilter = total > 0
   const isEmpty = visible.length === 0
+  const atLimit = isAtLimit(total)
 
   return (
     <>
@@ -178,20 +193,45 @@ export function WishlistScreen() {
               onRename={() => setEditingName(true)}
               onLogout={() => void logoutAction()}
             />
-            {/* Always the whole list, never the filtered subset. */}
+            {/* Always the whole list, never the filtered subset. The «N / 30»
+                sits beside the counter rather than replacing it, and is muted
+                because a limit approaching is information, not a problem —
+                hence Mid Gray and never Ember (stage-2.md §4). */}
             <p className="mt-1 text-body text-mid-gray">
               {formatCounter(total, done)}
+              {shouldShowLimit(total) ? (
+                <span className="ml-2">{formatLimit(total)}</span>
+              ) : null}
             </p>
           </div>
 
           {/* Desktop actions; on mobile they live in the pinned bar below. */}
-          <div className="hidden shrink-0 gap-2 md:flex">
-            <ButtonLink href="/share" variant="outline">
-              Поділитися
-            </ButtonLink>
-            <ButtonLink href="/add">Додати</ButtonLink>
+          <div className="hidden shrink-0 flex-col items-end gap-2 md:flex">
+            <div className="flex gap-2">
+              <ButtonLink href="/share" variant="outline">
+                Поділитися
+              </ButtonLink>
+              {atLimit ? (
+                <Button disabled>Додати</Button>
+              ) : (
+                <ButtonLink href="/add">Додати</ButtonLink>
+              )}
+            </div>
+            {atLimit ? (
+              <p className="text-body text-mid-gray">{LIMIT_REACHED_TEXT}</p>
+            ) : null}
           </div>
         </header>
+
+        {bootstrapStatus === 'running' ? (
+          <p className="mt-4 text-body text-mid-gray">
+            Переносимо твої бажання…
+          </p>
+        ) : null}
+
+        {bootstrapNotice ? (
+          <p className="mt-4 text-body text-mid-gray">{bootstrapNotice}</p>
+        ) : null}
 
         {showFilter ? (
           <div className="mt-6 flex gap-2">
@@ -244,13 +284,24 @@ export function WishlistScreen() {
       </main>
 
       {/* Mobile: «Додати» pinned to the bottom of the screen (spec.md §4). */}
-      <nav className="fixed inset-x-0 bottom-0 flex gap-2 border-t border-hairline bg-canvas px-6 py-4 md:hidden">
-        <ButtonLink href="/share" variant="outline" fullWidth className="flex-1">
-          Поділитися
-        </ButtonLink>
-        <ButtonLink href="/add" fullWidth className="flex-1">
-          Додати
-        </ButtonLink>
+      <nav className="fixed inset-x-0 bottom-0 border-t border-hairline bg-canvas px-6 py-4 md:hidden">
+        {atLimit ? (
+          <p className="mb-2 text-body text-mid-gray">{LIMIT_REACHED_TEXT}</p>
+        ) : null}
+        <div className="flex gap-2">
+          <ButtonLink href="/share" variant="outline" fullWidth className="flex-1">
+            Поділитися
+          </ButtonLink>
+          {atLimit ? (
+            <Button disabled fullWidth className="flex-1">
+              Додати
+            </Button>
+          ) : (
+            <ButtonLink href="/add" fullWidth className="flex-1">
+              Додати
+            </ButtonLink>
+          )}
+        </div>
       </nav>
 
       {editingName ? (

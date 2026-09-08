@@ -31,7 +31,8 @@ import {
   validateTitle,
   type Currency,
 } from '../lib/domain'
-import { createWishAction } from '../app/actions/wishes'
+import { countWishesAction, createWishAction } from '../app/actions/wishes'
+import { LIMIT_REACHED_TEXT, isAtLimit } from '../lib/domain'
 
 export function AddScreen() {
   const router = useRouter()
@@ -57,9 +58,21 @@ export function AddScreen() {
     if (profileStatus === 'ready' && profile) titleRef.current?.focus()
   }, [profileStatus, profile])
 
+  // The form can be reached directly at /add while the account is already full
+  // (stage-2.md §4), so it checks for itself rather than trusting that the hub
+  // disabled the entry point.
+  const [total, setTotal] = useState<number | null>(null)
+  useEffect(() => {
+    if (profileStatus !== 'ready' || !profile) return
+    countWishesAction()
+      .then(setTotal)
+      .catch(() => setTotal(null))
+  }, [profileStatus, profile])
+  const atLimit = total !== null && isAtLimit(total)
+
   const dirty =
     title !== '' || emoji !== null || image !== null || price !== '' || url !== ''
-  const canSubmit = validateTitle(title).valid && !saving
+  const canSubmit = validateTitle(title).valid && !saving && !atLimit
 
   // ---- back-navigation guard (interactions.md §3.7) ----
   // Hardware back and the browser's swipe gesture must behave like the on-screen
@@ -281,9 +294,21 @@ export function AddScreen() {
                 </div>
               </div>
             ) : (
-              <Button type="submit" disabled={!canSubmit} fullWidth className="sm:w-auto">
-                Додати бажання
-              </Button>
+              <div>
+                <Button
+                  type="submit"
+                  disabled={!canSubmit}
+                  fullWidth
+                  className="sm:w-auto"
+                >
+                  Додати бажання
+                </Button>
+                {atLimit ? (
+                  <p className="mt-2 text-body text-mid-gray">
+                    {LIMIT_REACHED_TEXT}
+                  </p>
+                ) : null}
+              </div>
             )}
           </form>
         </div>

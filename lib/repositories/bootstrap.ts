@@ -5,43 +5,14 @@
  * for the first time. They are deliberately NOT inserted whenever the wish
  * store happens to be empty — otherwise they would reappear after the user
  * deletes everything by hand, which reads as a bug.
+ *
+ * Stage 2 keeps this for the local store only; the account-side equivalent
+ * lives in lib/migration/bootstrapAccount.ts and seeds the same shared list.
  */
 
-import { DEFAULT_CURRENCY, LOCAL_USER_ID, type Profile } from '../domain/types'
-import type { NewWish } from '../domain/types'
+import { LOCAL_USER_ID, type Profile } from '../domain/types'
+import { SEED_SPACING_MS, SEED_WISHES } from '../domain/seed'
 import type { ProfileRepository, WishRepository } from './types'
-
-/** One minute apart, so the newest-first ordering is stable and obvious. */
-const SEED_SPACING_MS = 60_000
-
-interface SeedWish extends NewWish {
-  isDone: boolean
-}
-
-/** docs/spec.md §2 — «Тестові дані». Listed newest-first. */
-const SEED_WISHES: SeedWish[] = [
-  {
-    title: 'Книжка про дизайн',
-    emoji: '📚',
-    price: 450,
-    currency: DEFAULT_CURRENCY,
-    isDone: false,
-  },
-  {
-    title: 'Вихідні у Львові',
-    emoji: '✈️',
-    price: 3000,
-    currency: DEFAULT_CURRENCY,
-    isDone: false,
-  },
-  {
-    title: 'Навушники',
-    emoji: '🎧',
-    price: 2200,
-    currency: DEFAULT_CURRENCY,
-    isDone: true,
-  },
-]
 
 /**
  * Creates the profile and its seed wishes together.

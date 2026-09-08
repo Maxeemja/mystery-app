@@ -49,6 +49,20 @@ export function useWishes() {
   }, [])
 
   /**
+   * Re-reads the list. The account bootstrap (migration or seeding) inserts
+   * wishes server-side after this hook's initial fetch has already resolved,
+   * so the hub needs a way to pick them up without a reload.
+   */
+  const reload = useCallback(async () => {
+    try {
+      setWishes(await listWishesAction())
+      setStatus('ready')
+    } catch {
+      setStatus('error')
+    }
+  }, [])
+
+  /**
    * `previous` is read directly off the `wishes` closure rather than captured
    * as a side effect inside the optimistic `setWishes` updater. The updater
    * form doesn't guarantee it runs before the code right after it — in
@@ -103,5 +117,6 @@ export function useWishes() {
     saveError,
     toggleDone,
     remove,
+    reload,
   }
 }

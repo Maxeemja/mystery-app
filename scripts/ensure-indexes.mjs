@@ -28,6 +28,19 @@ try {
   await db.collection('users').createIndex({ shareToken: 1 }, { unique: true })
   await db.collection('wishes').createIndex({ userId: 1 })
 
+  // Migration idempotency (docs/stage-2.md §6). Partial, so it constrains only
+  // migrated documents — natively created wishes have no such field, and a
+  // plain unique index would treat all of them as duplicate nulls and reject
+  // every wish after the first. Scoped by userId because two accounts can
+  // legitimately migrate from the same browser's local store.
+  await db.collection('wishes').createIndex(
+    { userId: 1, migratedFromLocalId: 1 },
+    {
+      unique: true,
+      partialFilterExpression: { migratedFromLocalId: { $exists: true } },
+    }
+  )
+
   for (const name of ['users', 'wishes']) {
     const indexes = await db.collection(name).indexes()
     const described = indexes.map(
