@@ -39,7 +39,7 @@
  * card is disabled meanwhile.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { ReservableWishCard } from './ReservableWishCard'
 import type { Wish } from '../../lib/domain'
@@ -61,6 +61,19 @@ interface GuestGridProps {
 export function GuestGrid({ shareToken, wishes, initialView }: GuestGridProps) {
   const [view, setView] = useState(initialView)
   const [namingId, setNamingId] = useState<string | null>(null)
+
+  // Esc closes the open prompt — interactions.md §0.3 applies it to every
+  // inline confirmation in the app, and the hub's own delete confirmation does
+  // the same. The listener lives here rather than in the card because the open
+  // card is the grid's state: one listener, and nothing to clean up per card.
+  useEffect(() => {
+    if (!namingId) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setNamingId(null)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [namingId])
 
   const resync = useCallback(async () => {
     setView(await refreshReservationsAction(shareToken))
