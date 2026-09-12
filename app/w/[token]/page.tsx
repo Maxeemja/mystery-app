@@ -1,19 +1,29 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
+import { GuestGrid } from '../../../components/guest/GuestGrid'
 import { GuestWishCard } from '../../../components/guest/GuestWishCard'
 import { ButtonLink } from '../../../components/ui/Button'
 import { currentUserId } from '../../../lib/auth/session'
 import { formatWishCount } from '../../../lib/domain'
+import { readGuestId } from '../../../lib/guests/guestId'
 import { loadGuestList } from '../../../lib/share/guestList'
+import { loadReservationView } from '../../../lib/share/guestReservations'
 
 /**
  * Guest view — docs/stage-2.md §5.3.
  *
- * Entirely server-rendered, and deliberately free of Client Components: it has
- * to work with JavaScript disabled, which is an explicit acceptance item. This
- * is the one screen where server rendering earns its keep — it opens fast, it
- * survives a hostile network, and it produces real OG tags for messengers.
+ * Server-rendered end to end: the list, the banner, the 404 and the OG tags for
+ * messengers all resolve before anything reaches the browser. This is the one
+ * screen where that really earns its keep — it opens fast and it survives a
+ * hostile network.
+ *
+ * Reservation (§5.4) added the screen's first interactive element, so the grid
+ * a *guest* sees is now a Client Component. Everything on this page still
+ * renders without JavaScript, including the «Заброньовано: …» badges; what
+ * stops working with scripting off is reserving and cancelling. `GuestGrid`'s
+ * own comment explains why that was the better trade. The owner's branch is
+ * untouched and has no client code at all.
  *
  * There is no "view as guest" gate. The list renders immediately; the CTA at
  * the bottom does the job a gate would have done, pointing the other way —
@@ -52,6 +62,25 @@ export default async function GuestListPage({ params }: PageProps) {
   const isOwner = viewerId === list.ownerId
   const isEmpty = list.wishes.length === 0
 
+  /**
+   * The owner/guest split (docs/prompter-task-reservations.md §5).
+   *
+   * The branch is here, above the render, and it decides whether the
+   * `reservations` collection is queried *at all* — not whether a badge is
+   * displayed. On the owner's branch `reservationView` is never computed, so
+   * `loadReservationView` never runs, no reservation field exists on anything
+   * this component holds, and there is nothing for the RSC payload to carry.
+   * Their `/w/{token}` is the plain `wishRepository.list(ownerId)` the hub
+   * itself uses, rendered through the same `GuestWishCard` as before.
+   *
+   * Deliberately *not* one loader that takes an `isOwner` flag: that shape puts
+   * the owner's privacy one forgotten argument away from failing, and it is the
+   * shape §5 names as the thing not to build.
+   */
+  const reservationView = isOwner
+    ? null
+    : await loadReservationView(list.ownerId, await readGuestId())
+
   return (
     <main className="mx-auto max-w-page px-6 py-10">
       {/* Confetti Amber lives here and on the owner's Share banner, nowhere
@@ -76,6 +105,12 @@ export default async function GuestListPage({ params }: PageProps) {
         <p className="mt-8 text-center text-subheading text-mid-gray">
           Тут поки порожньо
         </p>
+      ) : reservationView ? (
+        <GuestGrid
+          shareToken={token}
+          wishes={list.wishes}
+          initialView={reservationView}
+        />
       ) : (
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {list.wishes.map((wish) => (

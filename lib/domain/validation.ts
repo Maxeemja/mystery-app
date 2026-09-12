@@ -49,6 +49,29 @@ function pluralizeSymbols(n: number): string {
   return forms[pluralCategory(n)]
 }
 
+/**
+ * Guest name on a reservation — docs/stage-2.md §5.4, 1–30 characters trimmed.
+ *
+ * Separate from `validateName` rather than reusing it: the account name is
+ * 3–15 because it is a display identity the owner lives with, while this is a
+ * one-off label another guest reads once («Заброньовано: Оксана»). Reusing the
+ * account rule would reject a two-letter name for no reason the guest could
+ * understand, and tying the two together would mean a future change to one
+ * silently moves the other.
+ */
+export const GUEST_NAME_MIN_LENGTH = 1
+export const GUEST_NAME_MAX_LENGTH = 30
+
+export function validateGuestName(raw: string): ValidationResult {
+  const value = raw.trim()
+  return {
+    value,
+    valid:
+      value.length >= GUEST_NAME_MIN_LENGTH &&
+      value.length <= GUEST_NAME_MAX_LENGTH,
+  }
+}
+
 /** Wish title: trimmed, non-empty, at most 60 characters. */
 export function validateTitle(raw: string): ValidationResult {
   const value = raw.trim()

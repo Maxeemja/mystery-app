@@ -23,6 +23,7 @@ const DB_NAME = 'wishlist'
 
 export const COLLECTION_USERS = 'users'
 export const COLLECTION_WISHES = 'wishes'
+export const COLLECTION_RESERVATIONS = 'reservations'
 
 /** Shape of a `users` document — docs/stage-2.md §2. */
 export interface UserDoc {
@@ -67,6 +68,27 @@ export interface WishDoc {
   migratedFromLocalId?: string
 }
 
+/**
+ * Shape of a `reservations` document — docs/stage-2.md §2, §5.4.
+ *
+ * `listOwnerId` is denormalized off the wish so that "one reservation per guest
+ * per list" can be a unique index rather than an application-level check across
+ * two collections. It is written once at insert time and never updated: a wish
+ * cannot change owner (the repository's patch type excludes `userId` for
+ * exactly that reason), so the copy cannot go stale.
+ *
+ * `guestId` is a random cookie value with no relation to `users` — a guest does
+ * not have an account, by design (docs/prompter-task-reservations.md §3).
+ */
+export interface ReservationDoc {
+  _id: ObjectId
+  wishId: ObjectId
+  listOwnerId: ObjectId
+  guestId: string
+  guestName: string
+  createdAt: Date
+}
+
 declare global {
   // eslint-disable-next-line no-var
   var __wishlistMongo: Promise<MongoClient> | undefined
@@ -97,4 +119,10 @@ export async function usersCollection(): Promise<Collection<UserDoc>> {
 
 export async function wishesCollection(): Promise<Collection<WishDoc>> {
   return (await getDb()).collection<WishDoc>(COLLECTION_WISHES)
+}
+
+export async function reservationsCollection(): Promise<
+  Collection<ReservationDoc>
+> {
+  return (await getDb()).collection<ReservationDoc>(COLLECTION_RESERVATIONS)
 }

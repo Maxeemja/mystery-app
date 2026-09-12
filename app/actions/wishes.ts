@@ -18,6 +18,7 @@ import {
   type WishPatch,
 } from '../../lib/domain'
 import { profileRepository, wishRepository } from '../../lib/repositories/server'
+import { deleteReservationsForWish } from '../../lib/reservations/store'
 
 /**
  * The app's mutation surface — docs/prompter-task-stage-2.md §1.
@@ -167,6 +168,13 @@ export async function updateWishAction(
   if (!title.valid) throw new Error('Invalid title')
 
   // No 30-wish check here: editing creates no records (§7).
+  //
+  // And no reservation cascade here either, deliberately: docs/stage-2.md
+  // §5.4's edge-case table says editing a reserved wish's title, price or image
+  // leaves the reservation in place. It is the same record with a corrected
+  // label, not a different gift, and the guest who claimed it has no way to
+  // learn it was renamed. Delete and done are the only two mutations that
+  // cascade.
 
   // Read first, only to learn which file may need destroying afterwards. The
   // write below is still scoped by owner in its own filter, so this read is not
@@ -244,7 +252,20 @@ export async function setWishDoneAction(
   isDone: boolean
 ): Promise<Wish> {
   const userId = await requireUserId()
-  return wishRepository.update(userId, id, { isDone })
+  const wish = await wishRepository.update(userId, id, { isDone })
+
+  // Cascade (docs/stage-2.md §5.4). Only on the way *to* done: a done wish is
+  // already absent from the guest screen, so a reservation on it points at a
+  // card nobody can see. Un-checking deliberately does not resurrect it — the
+  // edge-case table treats the reservation as gone, not suspended, and a guest
+  // who has since reserved something else would otherwise end up holding two.
+  //
+  // After the update, never before, mirroring how the Cloudinary cleanup is
+  // sequenced in `removeWishAction`: the owner's own mutation is the thing they
+  // asked for, and it must not be held hostage by a dependent cleanup.
+  if (isDone) await deleteReservationsForWish(id)
+
+  return wish
 }
 
 export async function removeWishAction(id: string): Promise<void> {
@@ -255,6 +276,11 @@ export async function removeWishAction(id: string): Promise<void> {
   // failures — so a Cloudinary outage orphans a file but never resurrects a
   // wish the user asked to delete (docs/stage-2.md §7).
   if (removed?.imagePublicId) await destroyImage(removed.imagePublicId)
+
+  // Same cascade, same ordering. Guarded on `removed` so a foreign or
+  // already-deleted id cannot be used to strip a reservation off a wish the
+  // caller does not own: `remove` returns null in exactly those cases.
+  if (removed) await deleteReservationsForWish(id)
 }
 
 export async function renameProfileAction(rawName: string): Promise<void> {

@@ -41,7 +41,23 @@ try {
     }
   )
 
-  for (const name of ['users', 'wishes']) {
+  // Guest reservations (docs/stage-2.md §2, §5.4). Both of these are
+  // correctness guarantees, not query optimizations — the application layer
+  // checks the same things, but only the database can decide a race. Without
+  // them a double-click or two concurrent requests produce two reservations.
+  await db
+    .collection('reservations')
+    // One reservation per wish: the loser of a race gets a duplicate-key error,
+    // which the reserve action turns into «Хтось інший щойно забронював це».
+    .createIndex({ wishId: 1 }, { unique: true })
+  await db
+    .collection('reservations')
+    // One reservation per guest per list. Compound on the denormalized
+    // `listOwnerId` rather than joining through `wishes`, so the constraint is
+    // expressible as an index at all.
+    .createIndex({ listOwnerId: 1, guestId: 1 }, { unique: true })
+
+  for (const name of ['users', 'wishes', 'reservations']) {
     const indexes = await db.collection(name).indexes()
     const described = indexes.map(
       (index) => `${index.name}${index.unique ? ' (unique)' : ''}`
